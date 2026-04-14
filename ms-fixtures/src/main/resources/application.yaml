@@ -1,3 +1,15 @@
 spring:
   application:
     name: ms-fixtures
+
+server:
+  port: 8084
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always

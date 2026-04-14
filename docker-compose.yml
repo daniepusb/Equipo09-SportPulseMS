@@ -1,0 +1,247 @@
+version: '3.8'
+
+networks:
+  sportpulse-internal-network:
+    driver: bridge
+    external: false
+
+services:
+  # ==================== BASES DE DATOS ====================
+  postgres-auth:
+    image: postgres:15-alpine
+    container_name: sportpulse-postgres-auth
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postgres-notifications:
+    image: postgres:15-alpine
+    container_name: sportpulse-postgres-notifications
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    environment:
+      POSTGRES_DB: notifications_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - postgres-notifications-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d notifications_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ==================== MICROSERVICIOS ====================
+  ms-auth:
+    build: ./ms-auth
+    container_name: sportpulse-ms-auth
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      JWT_SECRET: sportpulse-secret-key-2025
+      JWT_EXPIRATION: 3600000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  ms-leagues:
+    build: ./ms-leagues
+    container_name: sportpulse-ms-leagues
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8082:8082"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: sportpulse-secret-key-2025
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  ms-teams:
+    build: ./ms-teams
+    container_name: sportpulse-ms-teams
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8083:8083"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: sportpulse-secret-key-2025
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  ms-fixtures:
+    build: ./ms-fixtures
+    container_name: sportpulse-ms-fixtures
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8084:8084"
+    depends_on:
+      ms-teams:
+        condition: service_healthy
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: sportpulse-secret-key-2025
+      TEAMS_SERVICE_URL: http://ms-teams:8083
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  ms-standings:
+    build: ./ms-standings
+    container_name: sportpulse-ms-standings
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8085:8085"
+    depends_on:
+      ms-teams:
+        condition: service_healthy
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: sportpulse-secret-key-2025
+      TEAMS_SERVICE_URL: http://ms-teams:8083
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  ms-notifications:
+    build: ./ms-notifications
+    container_name: sportpulse-ms-notifications
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres-notifications:
+        condition: service_healthy
+      ms-fixtures:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/notifications_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      JWT_SECRET: sportpulse-secret-key-2025
+      FIXTURES_SERVICE_URL: http://ms-fixtures:8084
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8086/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  ms-dashboard:
+    build: ./ms-dashboard
+    container_name: sportpulse-ms-dashboard
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8087:8087"
+    depends_on:
+      ms-fixtures:
+        condition: service_healthy
+      ms-standings:
+        condition: service_healthy
+      ms-leagues:
+        condition: service_healthy
+    environment:
+      JWT_SECRET: sportpulse-secret-key-2025
+      FIXTURES_SERVICE_URL: http://ms-fixtures:8084
+      STANDINGS_SERVICE_URL: http://ms-standings:8085
+      LEAGUES_SERVICE_URL: http://ms-leagues:8082
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8087/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  ms-gateway:
+    build: ./ms-gateway
+    container_name: sportpulse-gateway
+    restart: "no"
+    networks:
+      - sportpulse-internal-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      ms-auth:
+        condition: service_healthy
+      ms-leagues:
+        condition: service_healthy
+      ms-teams:
+        condition: service_healthy
+      ms-fixtures:
+        condition: service_healthy
+      ms-standings:
+        condition: service_healthy
+      ms-notifications:
+        condition: service_healthy
+      ms-dashboard:
+        condition: service_healthy
+    environment:
+      AUTH_SERVICE_URL: http://ms-auth:8081
+      LEAGUES_SERVICE_URL: http://ms-leagues:8082
+      TEAMS_SERVICE_URL: http://ms-teams:8083
+      FIXTURES_SERVICE_URL: http://ms-fixtures:8084
+      STANDINGS_SERVICE_URL: http://ms-standings:8085
+      NOTIFICATIONS_SERVICE_URL: http://ms-notifications:8086
+      DASHBOARD_SERVICE_URL: http://ms-dashboard:8087
+      RATE_LIMIT_PER_IP: 60
+      JWT_SECRET: sportpulse-secret-key-2025
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres-auth-data:
+  postgres-notifications-data:

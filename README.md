@@ -9,13 +9,13 @@ that communicate with each other and consume data from the API-Football external
 
 | Service          | Port | Responsibility                             |
 |------------------|------|--------------------------------------------|
-| ms-gateway       | 8080 | Entry point, routing and rate limiting     |
-| ms-auth          | 8081 | Registration, login and JWT token issuance |
-| ms-leagues       | 8082 | Leagues, countries and seasons             |
-| ms-teams         | 8083 | Teams, shields and general info            |
-| ms-fixtures      | 8085 | Matches, calendars and results             |
-| ms-standings     | 8086 | League standings by season                 |
-| ms-notifications | 8088 | Subscriptions and event alerts             |
-| ms-dashboard     | 8089 | Aggregated executive summary               |
+| ms-gateway       | 8080 | Punto de entrada, ruteo y rate limiting     |
+| ms-auth          | 8081 | Registro, login y emisión de tokens JWT    |
+| ms-leagues       | 8082 | Ligas, países y temporadas                 |
+| ms-teams         | 8083 | Equipos, escudos e info general            |
+| ms-fixtures      | 8084 | Partidos, calendarios y resultados         |
+| ms-standings     | 8085 | Tablas de posiciones por temporada         |
+| ms-notifications | 8086 | Suscripciones y alertas de eventos         |
+| ms-dashboard     | 8087 | Resumen ejecutivo agregado                 |
 
 
