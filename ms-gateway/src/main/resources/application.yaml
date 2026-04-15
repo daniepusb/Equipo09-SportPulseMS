@@ -1,15 +1,49 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: ms-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth
+          uri: ${AUTH_SERVICE_URL}
+          predicates:
+            - Path=/api/auth/**
 
-server:
-  port: 8080
+        - id: leagues
+          uri: ${LEAGUES_SERVICE_URL}
+          predicates:
+            - Path=/api/leagues/**
+
+        - id: teams
+          uri: ${TEAMS_SERVICE_URL}
+          predicates:
+            - Path=/api/teams/**
+
+        - id: fixtures
+          uri: ${FIXTURES_SERVICE_URL}
+          predicates:
+            - Path=/api/fixtures/**
+
+        - id: standings
+          uri: ${STANDINGS_SERVICE_URL}
+          predicates:
+            - Path=/api/standings/**
+
+        - id: notifications
+          uri: ${NOTIFICATIONS_SERVICE_URL}
+          predicates:
+            - Path=/api/notifications/**
+
+        - id: dashboard
+          uri: ${DASHBOARD_SERVICE_URL}
+          predicates:
+            - Path=/api/dashboard/**
 
 management:
   endpoints:
     web:
       exposure:
-        include: health
-  endpoint:
-    health:
-      show-details: always
+        include: health,info
