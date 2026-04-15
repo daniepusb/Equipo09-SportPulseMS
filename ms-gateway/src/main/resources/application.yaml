@@ -41,9 +41,16 @@ spring:
           uri: ${DASHBOARD_SERVICE_URL}
           predicates:
             - Path=/api/dashboard/**
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
+  health:
+    redis:
+      enabled: false
