@@ -8,17 +8,17 @@ spring:
     gateway:
       routes:
         - id: auth
-          uri: ${AUTH_SERVICE_URL}
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/api/auth/**
 
         - id: leagues
-          uri: ${LEAGUES_SERVICE_URL}
+          uri: ${LEAGUES_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/leagues/**
 
         - id: teams
-          uri: ${TEAMS_SERVICE_URL}
+          uri: ${TEAMS_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/teams/**
 

@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import java.net.ConnectException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +34,8 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         if (ex instanceof ResponseStatusException) {
             status = (HttpStatus) ((ResponseStatusException) ex).getStatusCode();
             message = ((ResponseStatusException) ex).getReason();
-        } else if (ex.getMessage() != null && ex.getMessage().contains("Connection refused")) {
+        } else {
+            // Cualquier otro error (Connection refused, Timeout, etc.) se trata como servicio no disponible
             status = HttpStatus.SERVICE_UNAVAILABLE;
             message = "Service is currently unavailable. Please try again later.";
         }
