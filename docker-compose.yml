@@ -1,189 +1,234 @@
 version: '3.8'
 
+x-common-env: &common-env
+  JWT_SECRET: ${JWT_SECRET}
+  RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 10s
+  timeout: 5s
+  retries: 3
+  start_period: 15s
+
+x-spring-health: &spring-health
+  test: ["CMD", "wget", "-qO-", "http://localhost:${INTERNAL_PORT}/actuator/health"]
+  <<: *healthcheck-defaults
+
 networks:
-  sportpulse-internal-network:
+  sportpulse-network:
     driver: bridge
-    external: false
 
 services:
-  # ==================== BASES DE DATOS ====================
+  redis:
+    image: redis:7-alpine
+    container_name: sportpulse-redis
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: ${REDIS_MEM_LIMIT}
+          cpus: '0.5'
+
   postgres-auth:
     image: postgres:15-alpine
     container_name: sportpulse-postgres-auth
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
+      - sportpulse-network
     environment:
-      POSTGRES_DB: auth_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
     volumes:
       - postgres-auth-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d auth_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER} -d ${AUTH_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${AUTH_DB_MEM_LIMIT}
+          cpus: '0.5'
 
   postgres-notifications:
     image: postgres:15-alpine
     container_name: sportpulse-postgres-notifications
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
+      - sportpulse-network
     environment:
-      POSTGRES_DB: notifications_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ${NOTIF_DB_NAME}
+      POSTGRES_USER: ${NOTIF_DB_USER}
+      POSTGRES_PASSWORD: ${NOTIF_DB_PASSWORD}
     volumes:
       - postgres-notifications-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d notifications_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${NOTIF_DB_USER} -d ${NOTIF_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${NOTIF_DB_MEM_LIMIT}
+          cpus: '0.5'
 
-  # ==================== MICROSERVICIOS ====================
   ms-auth:
     build: ./ms-auth
     container_name: sportpulse-ms-auth
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8081:8081"
+      - sportpulse-network
     depends_on:
       postgres-auth:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin123
-      JWT_SECRET: sportpulse-secret-key-2025
-      JWT_EXPIRATION: 3600000
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/${AUTH_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      SERVER_PORT: ${AUTH_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${AUTH_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${AUTH_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-leagues:
     build: ./ms-leagues
     container_name: sportpulse-ms-leagues
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8082:8082"
+      - sportpulse-network
     environment:
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      JWT_SECRET: sportpulse-secret-key-2025
+      <<: *common-env
+      SERVER_PORT: ${LEAGUES_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${LEAGUES_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${LEAGUES_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-teams:
     build: ./ms-teams
     container_name: sportpulse-ms-teams
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8083:8083"
+      - sportpulse-network
     environment:
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      JWT_SECRET: sportpulse-secret-key-2025
+      <<: *common-env
+      SERVER_PORT: ${TEAMS_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8083/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${TEAMS_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${TEAMS_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-fixtures:
     build: ./ms-fixtures
     container_name: sportpulse-ms-fixtures
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8084:8084"
+      - sportpulse-network
     depends_on:
       ms-teams:
         condition: service_healthy
     environment:
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      JWT_SECRET: sportpulse-secret-key-2025
-      TEAMS_SERVICE_URL: http://ms-teams:8083
+      <<: *common-env
+      TEAMS_SERVICE_URL: http://ms-teams:${TEAMS_INTERNAL_PORT}
+      SERVER_PORT: ${FIXTURES_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8084/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${FIXTURES_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${FIXTURES_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-standings:
     build: ./ms-standings
     container_name: sportpulse-ms-standings
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8085:8085"
+      - sportpulse-network
     depends_on:
       ms-teams:
         condition: service_healthy
     environment:
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      JWT_SECRET: sportpulse-secret-key-2025
-      TEAMS_SERVICE_URL: http://ms-teams:8083
+      <<: *common-env
+      TEAMS_SERVICE_URL: http://ms-teams:${TEAMS_INTERNAL_PORT}
+      SERVER_PORT: ${STANDINGS_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8085/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${STANDINGS_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${STANDINGS_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-notifications:
     build: ./ms-notifications
     container_name: sportpulse-ms-notifications
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8086:8086"
+      - sportpulse-network
     depends_on:
       postgres-notifications:
         condition: service_healthy
       ms-fixtures:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/notifications_db
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin123
-      JWT_SECRET: sportpulse-secret-key-2025
-      FIXTURES_SERVICE_URL: http://ms-fixtures:8084
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/${NOTIF_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${NOTIF_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${NOTIF_DB_PASSWORD}
+      FIXTURES_SERVICE_URL: http://ms-fixtures:${FIXTURES_INTERNAL_PORT}
+      SERVER_PORT: ${NOTIF_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8086/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${NOTIF_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${NOTIF_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-dashboard:
     build: ./ms-dashboard
     container_name: sportpulse-ms-dashboard
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
-    ports:
-      - "8087:8087"
+      - sportpulse-network
     depends_on:
       ms-fixtures:
         condition: service_healthy
@@ -192,25 +237,29 @@ services:
       ms-leagues:
         condition: service_healthy
     environment:
-      JWT_SECRET: sportpulse-secret-key-2025
-      FIXTURES_SERVICE_URL: http://ms-fixtures:8084
-      STANDINGS_SERVICE_URL: http://ms-standings:8085
-      LEAGUES_SERVICE_URL: http://ms-leagues:8082
+      <<: *common-env
+      FIXTURES_SERVICE_URL: http://ms-fixtures:${FIXTURES_INTERNAL_PORT}
+      STANDINGS_SERVICE_URL: http://ms-standings:${STANDINGS_INTERNAL_PORT}
+      LEAGUES_SERVICE_URL: http://ms-leagues:${LEAGUES_INTERNAL_PORT}
+      SERVER_PORT: ${DASHBOARD_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8087/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${DASHBOARD_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${DASHBOARD_MEM_LIMIT}
+          cpus: '0.5'
 
   ms-gateway:
     build: ./ms-gateway
     container_name: sportpulse-gateway
-    restart: "no"
+    restart: ${RESTART_POLICY}
     networks:
-      - sportpulse-internal-network
+      - sportpulse-network
     ports:
-      - "8080:8080"
+      - "${GATEWAY_HOST_PORT}:${GATEWAY_INTERNAL_PORT}"
     depends_on:
       ms-auth:
         condition: service_healthy
@@ -226,21 +275,30 @@ services:
         condition: service_healthy
       ms-dashboard:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      AUTH_SERVICE_URL: http://ms-auth:8081
-      LEAGUES_SERVICE_URL: http://ms-leagues:8082
-      TEAMS_SERVICE_URL: http://ms-teams:8083
-      FIXTURES_SERVICE_URL: http://ms-fixtures:8084
-      STANDINGS_SERVICE_URL: http://ms-standings:8085
-      NOTIFICATIONS_SERVICE_URL: http://ms-notifications:8086
-      DASHBOARD_SERVICE_URL: http://ms-dashboard:8087
-      RATE_LIMIT_PER_IP: 60
-      JWT_SECRET: sportpulse-secret-key-2025
+      AUTH_SERVICE_URL: http://ms-auth:${AUTH_INTERNAL_PORT}
+      LEAGUES_SERVICE_URL: http://ms-leagues:${LEAGUES_INTERNAL_PORT}
+      TEAMS_SERVICE_URL: http://ms-teams:${TEAMS_INTERNAL_PORT}
+      FIXTURES_SERVICE_URL: http://ms-fixtures:${FIXTURES_INTERNAL_PORT}
+      STANDINGS_SERVICE_URL: http://ms-standings:${STANDINGS_INTERNAL_PORT}
+      NOTIFICATIONS_SERVICE_URL: http://ms-notifications:${NOTIF_INTERNAL_PORT}
+      DASHBOARD_SERVICE_URL: http://ms-dashboard:${DASHBOARD_INTERNAL_PORT}
+      RATE_LIMIT_PER_IP: ${RATE_LIMIT_PER_IP}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SERVER_PORT: ${GATEWAY_INTERNAL_PORT}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      <<: *spring-health
+      environment:
+        INTERNAL_PORT: ${GATEWAY_INTERNAL_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: ${GATEWAY_MEM_LIMIT}
+          cpus: '1.0'
 
 volumes:
   postgres-auth-data:
