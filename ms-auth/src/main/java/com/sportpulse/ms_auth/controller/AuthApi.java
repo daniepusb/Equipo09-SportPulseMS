@@ -57,7 +57,9 @@ public interface AuthApi {
                     "Este endpoint es consumido por otros microservicios."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token procesado (válido o inválido)",
+            @ApiResponse(responseCode = "200", description = "Token válido - retorna datos del usuario",
+                    content = @Content(schema = @Schema(implementation = TokenPayload.class))),
+            @ApiResponse(responseCode = "401", description = "Token inválido, expirado o con firma incorrecta",
                     content = @Content(schema = @Schema(implementation = TokenPayload.class))),
             @ApiResponse(responseCode = "400", description = "Header Authorization requerido",
                     content = @Content)

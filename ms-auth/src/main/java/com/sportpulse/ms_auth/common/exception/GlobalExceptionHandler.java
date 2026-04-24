@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Credenciales inválidas", request);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

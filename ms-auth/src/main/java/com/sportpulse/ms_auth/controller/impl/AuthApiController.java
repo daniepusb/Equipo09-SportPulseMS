@@ -35,6 +35,10 @@ public class AuthApiController implements AuthApi {
     public ResponseEntity<TokenPayload> validateToken(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         TokenPayload payload = authService.validateToken(token);
-        return ResponseEntity.ok(payload);
+
+        if (payload.valid()) {
+            return ResponseEntity.ok(payload);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(payload);
     }
 }

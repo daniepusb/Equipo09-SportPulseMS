@@ -20,19 +20,22 @@ public class JwtServiceImpl implements JwtService {
 
     private static final Logger log = LoggerFactory.getLogger(JwtServiceImpl.class);
     private final SecretKey secretKey;
-    private static final long EXPIRATION_TIME = 864_000_000;
+    private final long expirationTime;
 
-    public JwtServiceImpl(@Value("${jwt.secret}") String secret) {
+    public JwtServiceImpl(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-expiration}") long accessExpiration) {
         if (secret.getBytes().length < 32) {
             throw new IllegalArgumentException("La clave secreta de JWT debe tener al menos 32 caracteres.");
         }
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expirationTime = accessExpiration;
     }
 
     @Override
     public TokenResponse generateToken(String email, String userId, String username, String role) {
         Date now = new Date();
-        Date expirationDate = new Date(now.getTime() + EXPIRATION_TIME);
+        Date expirationDate = new Date(now.getTime() + expirationTime);
 
         String normalizedRole = role.startsWith("ROLE_") ? role.substring(5) : role;
 
@@ -56,17 +59,24 @@ public class JwtServiceImpl implements JwtService {
         try {
             Claims claims = getClaims(token);
             if (claims.getExpiration().before(new Date())) {
-                return new TokenPayload(false, null, null, null);
+                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED");
             }
             return new TokenPayload(
                     true,
                     claims.get("userId", String.class),
                     claims.get("username", String.class),
-                    claims.get("role", String.class)
+                    claims.get("role", String.class),
+                    null
             );
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage() != null && e.getMessage().contains("expirado")) {
+                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED");
+            }
+            log.warn("Token JWT inválido: {}", e.getMessage());
+            return new TokenPayload(false, null, null, null, "INVALID_TOKEN");
         } catch (Exception e) {
             log.warn("Token JWT inválido: {}", e.getMessage());
-            return new TokenPayload(false, null, null, null);
+            return new TokenPayload(false, null, null, null, "INVALID_TOKEN");
         }
     }
 

@@ -17,3 +17,4 @@ spring:
 
 jwt:
   secret: test-secret-key-for-testing-purposes-minimum-32-chars
+  access-expiration: 3600000

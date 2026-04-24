@@ -14,6 +14,9 @@ public record TokenPayload(
         String username,
 
         @Schema(description = "Rol del usuario", example = "USER")
-        String role
+        String role,
+
+        @Schema(description = "Código de error si el token no es válido", example = "TOKEN_EXPIRED", nullable = true)
+        String error
 ) {
 }
