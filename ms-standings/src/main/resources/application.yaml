@@ -3,7 +3,7 @@ spring:
     name: ms-standings
 
 server:
-  port: 8085
+  port: ${SERVER_PORT}
 
 management:
   endpoints:

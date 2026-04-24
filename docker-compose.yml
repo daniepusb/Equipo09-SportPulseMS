@@ -7,12 +7,8 @@ x-common-env: &common-env
 x-healthcheck-defaults: &healthcheck-defaults
   interval: 10s
   timeout: 5s
-  retries: 3
-  start_period: 15s
-
-x-spring-health: &spring-health
-  test: ["CMD", "wget", "-qO-", "http://localhost:${INTERNAL_PORT}/actuator/health"]
-  <<: *healthcheck-defaults
+  retries: 5
+  start_period: 45s
 
 networks:
   sportpulse-network:
@@ -96,15 +92,22 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/${AUTH_DB_NAME}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_AUTH_HOST}:${DB_PORT}/${AUTH_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       SERVER_PORT: ${AUTH_INTERNAL_PORT}
+      DB_HOST: ${POSTGRES_AUTH_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${AUTH_DB_NAME}
+      DB_USERNAME: ${AUTH_DB_USER}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${AUTH_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${AUTH_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -121,9 +124,8 @@ services:
       <<: *common-env
       SERVER_PORT: ${LEAGUES_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${LEAGUES_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${LEAGUES_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -140,9 +142,8 @@ services:
       <<: *common-env
       SERVER_PORT: ${TEAMS_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${TEAMS_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${TEAMS_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -160,12 +161,11 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      TEAMS_SERVICE_URL: http://ms-teams:${TEAMS_INTERNAL_PORT}
+      TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
       SERVER_PORT: ${FIXTURES_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${FIXTURES_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${FIXTURES_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -183,12 +183,11 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      TEAMS_SERVICE_URL: http://ms-teams:${TEAMS_INTERNAL_PORT}
+      TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
       SERVER_PORT: ${STANDINGS_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${STANDINGS_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${STANDINGS_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -208,15 +207,14 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/${NOTIF_DB_NAME}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_NOTIF_HOST}:${DB_PORT}/${NOTIF_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${NOTIF_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${NOTIF_DB_PASSWORD}
-      FIXTURES_SERVICE_URL: http://ms-fixtures:${FIXTURES_INTERNAL_PORT}
+      FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
       SERVER_PORT: ${NOTIF_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${NOTIF_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${NOTIF_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -238,14 +236,13 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      FIXTURES_SERVICE_URL: http://ms-fixtures:${FIXTURES_INTERNAL_PORT}
-      STANDINGS_SERVICE_URL: http://ms-standings:${STANDINGS_INTERNAL_PORT}
-      LEAGUES_SERVICE_URL: http://ms-leagues:${LEAGUES_INTERNAL_PORT}
+      FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      STANDINGS_SERVICE_URL: ${STANDINGS_SERVICE_URL}
+      LEAGUES_SERVICE_URL: ${LEAGUES_SERVICE_URL}
       SERVER_PORT: ${DASHBOARD_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${DASHBOARD_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${DASHBOARD_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
@@ -278,22 +275,21 @@ services:
       redis:
         condition: service_healthy
     environment:
-      AUTH_SERVICE_URL: http://ms-auth:${AUTH_INTERNAL_PORT}
-      LEAGUES_SERVICE_URL: http://ms-leagues:${LEAGUES_INTERNAL_PORT}
-      TEAMS_SERVICE_URL: http://ms-teams:${TEAMS_INTERNAL_PORT}
-      FIXTURES_SERVICE_URL: http://ms-fixtures:${FIXTURES_INTERNAL_PORT}
-      STANDINGS_SERVICE_URL: http://ms-standings:${STANDINGS_INTERNAL_PORT}
-      NOTIFICATIONS_SERVICE_URL: http://ms-notifications:${NOTIF_INTERNAL_PORT}
-      DASHBOARD_SERVICE_URL: http://ms-dashboard:${DASHBOARD_INTERNAL_PORT}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      LEAGUES_SERVICE_URL: ${LEAGUES_SERVICE_URL}
+      TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
+      FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      STANDINGS_SERVICE_URL: ${STANDINGS_SERVICE_URL}
+      NOTIFICATIONS_SERVICE_URL: ${NOTIFICATIONS_SERVICE_URL}
+      DASHBOARD_SERVICE_URL: ${DASHBOARD_SERVICE_URL}
       RATE_LIMIT_PER_IP: ${RATE_LIMIT_PER_IP}
       JWT_SECRET: ${JWT_SECRET}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       SERVER_PORT: ${GATEWAY_INTERNAL_PORT}
     healthcheck:
-      <<: *spring-health
-      environment:
-        INTERNAL_PORT: ${GATEWAY_INTERNAL_PORT}
+      test: ["CMD", "wget", "-qO-", "http://localhost:${GATEWAY_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
     deploy:
       resources:
         limits:

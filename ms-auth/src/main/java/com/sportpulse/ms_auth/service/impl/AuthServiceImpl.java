@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (userEntityRepository.findByEmail(registerRequest.email()).isPresent()) {
             log.warn("Intento de crear usuario con email existente: {}", registerRequest.email());
-            throw new DuplicateEmailException("El email ya está registrado.");
+            throw new DuplicateEmailException("USER_ALREADY_EXISTS");
         }
 
         UserEntity userToSave = userMapper.toUserEntity(registerRequest);

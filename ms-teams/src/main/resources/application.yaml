@@ -3,7 +3,7 @@ spring:
     name: ms-teams
 
 server:
-  port: 8083
+  port: ${SERVER_PORT}
 
 management:
   endpoints:

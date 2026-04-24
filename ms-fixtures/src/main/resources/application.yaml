@@ -3,7 +3,7 @@ spring:
     name: ms-fixtures
 
 server:
-  port: 8084
+  port: ${SERVER_PORT}
 
 management:
   endpoints:
