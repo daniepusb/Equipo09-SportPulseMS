@@ -1,50 +1,46 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT}
 
 spring:
   application:
     name: ms-gateway
   cloud:
     gateway:
+      default-filters:
+        - AuthenticationFilter
       routes:
-        - id: auth
-          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL}
           predicates:
             - Path=/api/auth/**
-
-        - id: leagues
-          uri: ${LEAGUES_SERVICE_URL:http://localhost:8082}
+        - id: leagues-service
+          uri: ${LEAGUES_SERVICE_URL}
           predicates:
             - Path=/api/leagues/**
-
-        - id: teams
-          uri: ${TEAMS_SERVICE_URL:http://localhost:8083}
+        - id: teams-service
+          uri: ${TEAMS_SERVICE_URL}
           predicates:
             - Path=/api/teams/**
-
-        - id: fixtures
+        - id: fixtures-service
           uri: ${FIXTURES_SERVICE_URL}
           predicates:
             - Path=/api/fixtures/**
-
-        - id: standings
+        - id: standings-service
           uri: ${STANDINGS_SERVICE_URL}
           predicates:
             - Path=/api/standings/**
-
-        - id: notifications
+        - id: notifications-service
           uri: ${NOTIFICATIONS_SERVICE_URL}
           predicates:
             - Path=/api/notifications/**
-
-        - id: dashboard
+        - id: dashboard-service
           uri: ${DASHBOARD_SERVICE_URL}
           predicates:
             - Path=/api/dashboard/**
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 management:
   endpoints:

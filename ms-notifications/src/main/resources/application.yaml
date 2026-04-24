@@ -3,7 +3,7 @@ spring:
     name: ms-notifications
 
 server:
-  port: 8086
+  port: ${SERVER_PORT}
 
 management:
   endpoints:
