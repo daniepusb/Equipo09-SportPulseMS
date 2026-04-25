@@ -18,50 +18,50 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/api/auth")
-@Tag(name = "Auth", description = "Operaciones de autenticación")
+@Tag(name = "Auth", description = "Authentication and user management operations")
 public interface AuthApi {
 
     @Operation(
-            summary = "Registrar usuario",
-            description = "Crea un nuevo usuario en el sistema y retorna un token JWT"
+            summary = "User Registration",
+            description = "Creates a new user in the system and returns a JWT token for authentication"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente",
+            @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = @Content(schema = @Schema(implementation = TokenResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o password no cumple requisitos",
+            @ApiResponse(responseCode = "400", description = "Invalid data or password does not meet requirements",
                     content = @Content(schema = @Schema(implementation = Object.class))),
-            @ApiResponse(responseCode = "409", description = "El email ya está registrado",
+            @ApiResponse(responseCode = "409", description = "Email is already registered",
                     content = @Content(schema = @Schema(implementation = Object.class)))
     })
     @PostMapping("/register")
     ResponseEntity<TokenResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest);
 
     @Operation(
-            summary = "Iniciar sesión",
-            description = "Autentica un usuario existente y retorna un token JWT"
+            summary = "User Login",
+            description = "Authenticates an existing user and returns a JWT token for authentication"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login exitoso",
+            @ApiResponse(responseCode = "200", description = "Login successful",
                     content = @Content(schema = @Schema(implementation = TokenResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos",
+            @ApiResponse(responseCode = "400", description = "Invalid data or password does not meet requirements",
                     content = @Content(schema = @Schema(implementation = Object.class))),
-            @ApiResponse(responseCode = "401", description = "Credenciales incorrectas",
+            @ApiResponse(responseCode = "401", description = "Invalid credentials",
                     content = @Content(schema = @Schema(implementation = Object.class)))
     })
     @PostMapping("/login")
     ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest);
 
     @Operation(
-            summary = "Validar token",
-            description = "Valida un token JWT y retorna la información del usuario. " +
-                    "Este endpoint es consumido por otros microservicios."
+            summary = "Validate Token",
+            description = "Validates a JWT token and returns the user information. " +
+                    "This endpoint is consumed by other microservices."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token válido - retorna datos del usuario",
+            @ApiResponse(responseCode = "200", description = "Valid token - returns user information",
                     content = @Content(schema = @Schema(implementation = TokenPayload.class))),
-            @ApiResponse(responseCode = "401", description = "Token inválido, expirado o con firma incorrecta",
+            @ApiResponse(responseCode = "401", description = "Invalid token, expired or with incorrect signature",
                     content = @Content(schema = @Schema(implementation = TokenPayload.class))),
-            @ApiResponse(responseCode = "400", description = "Header Authorization requerido",
+            @ApiResponse(responseCode = "400", description = "Authorization header required and must start with 'Bearer '",
                     content = @Content)
     })
     @PostMapping("/validate")
