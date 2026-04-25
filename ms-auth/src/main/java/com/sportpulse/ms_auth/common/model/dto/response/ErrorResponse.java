@@ -14,7 +14,12 @@ public record ErrorResponse(
         @Schema(description = "Descriptive message of the error", example = "Password must be at least 8 characters")
         String message,
 
+        @Schema(description = "HTTP status code", example = "400")
+        int status,
+
+        @Schema(description = "Request path", example = "/api/auth/login")
+        String path,
+
         @Schema(description = "Timestamp of the error", example = "2026-04-23T16:30:00")
-        LocalDateTime timestamp,
-) {
+        LocalDateTime timestamp){
 }

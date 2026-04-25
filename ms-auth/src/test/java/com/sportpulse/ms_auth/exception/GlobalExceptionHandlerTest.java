@@ -56,7 +56,7 @@ class GlobalExceptionHandlerTest {
                 new BadCredentialsException("Bad credentials"), request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("Credenciales inválidas", response.getBody().message());
+        assertEquals("INVALID_CREDENTIALS", response.getBody().message());
     }
 
     @Test
