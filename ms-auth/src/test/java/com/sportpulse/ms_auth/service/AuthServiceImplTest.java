@@ -67,7 +67,7 @@ class AuthServiceImplTest {
                 .role(com.sportpulse.ms_auth.common.enums.UserRole.USER)
                 .createdAt(Instant.now())
                 .build();
-        TokenResponse tokenResponse = new TokenResponse("jwt-token");
+        TokenResponse tokenResponse = new TokenResponse("jwt-token", "Bearer", 3600L, userId.toString());
 
         when(userEntityRepository.findByEmail("john@test.com")).thenReturn(Optional.empty());
         when(userMapper.toUserEntity(any(RegisterRequest.class))).thenReturn(savedUser);
@@ -78,7 +78,7 @@ class AuthServiceImplTest {
         TokenResponse result = authService.createUser(request);
 
         assertNotNull(result);
-        assertEquals("jwt-token", result.accessToken());
+        assertEquals("jwt-token", result.token());
         verify(userEntityRepository).findByEmail("john@test.com");
         verify(userEntityRepository).save(any(UserEntity.class));
     }
@@ -110,7 +110,7 @@ class AuthServiceImplTest {
                 .role(com.sportpulse.ms_auth.common.enums.UserRole.USER)
                 .build();
         Authentication authentication = mock(Authentication.class);
-        TokenResponse tokenResponse = new TokenResponse("jwt-token");
+        TokenResponse tokenResponse = new TokenResponse("jwt-token", "Bearer", 3600L, userId.toString());
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
@@ -120,7 +120,7 @@ class AuthServiceImplTest {
         TokenResponse result = authService.login(request);
 
         assertNotNull(result);
-        assertEquals("jwt-token", result.accessToken());
+        assertEquals("jwt-token", result.token());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
