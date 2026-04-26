@@ -62,17 +62,15 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.username").value("john"))
-            .andExpect(jsonPath("$.email").value("john@test.com"))
-            .andExpect(jsonPath("$.role").value("USER"))
-            .andExpect(jsonPath("$.createdAt").exists())
+            .andExpect(jsonPath("$.token").exists())
+            .andExpect(jsonPath("$.tokenType").value("Bearer"))
+            .andExpect(jsonPath("$.expiresIn").isNumber())
+            .andExpect(jsonPath("$.userId").exists())
                 .andReturn();
 
-        RegisterResponse response = objectMapper.readValue(
-            result.getResponse().getContentAsString(), RegisterResponse.class);
-        assertNotNull(response.id());
-        assertTrue(response.createdAt().toString().endsWith("Z"));
+        TokenResponse response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), TokenResponse.class);
+        assertNotNull(response.token());
     }
 
     @Test
@@ -176,10 +174,10 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.tokenType").value("Bearer"))
-                .andExpect(jsonPath("$.expiresIn").isNumber())
-                .andExpect(jsonPath("$.userId").exists())
+            .andExpect(jsonPath("$.token").exists())
+            .andExpect(jsonPath("$.tokenType").value("Bearer"))
+            .andExpect(jsonPath("$.expiresIn").isNumber())
+            .andExpect(jsonPath("$.userId").exists())
                 .andReturn();
 
         TokenResponse response = objectMapper.readValue(
@@ -248,9 +246,7 @@ class AuthApiControllerTest {
     @Test
     void validate_withValidToken_returns200() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("john", "john@test.com", "Password1");
-        authService.createUser(registerRequest);
-        LoginRequest loginRequest = new LoginRequest("john@test.com", "Password1");
-        TokenResponse tokenResponse = authService.login(loginRequest);
+        TokenResponse tokenResponse = authService.createUser(registerRequest);
         String token = tokenResponse.token();
 
         mockMvc.perform(post("/api/auth/validate")

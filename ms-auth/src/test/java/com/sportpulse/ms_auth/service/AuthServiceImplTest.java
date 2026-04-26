@@ -69,6 +69,7 @@ class AuthServiceImplTest {
                 .role(com.sportpulse.ms_auth.common.enums.UserRole.USER)
                 .createdAt(createdAt)
                 .build();
+        TokenResponse tokenResponse = new TokenResponse("jwt-token", "Bearer", 3600L, userId.toString());
 
         when(userEntityRepository.findByEmail("john@test.com")).thenReturn(Optional.empty());
         when(userMapper.toUserEntity(any(RegisterRequest.class))).thenReturn(savedUser);
@@ -78,11 +79,7 @@ class AuthServiceImplTest {
         RegisterResponse result = authService.createUser(request);
 
         assertNotNull(result);
-        assertEquals(userId.toString(), result.id());
-        assertEquals("john", result.username());
-        assertEquals("john@test.com", result.email());
-        assertEquals("USER", result.role());
-        assertEquals(createdAt, result.createdAt());
+        assertEquals("jwt-token", result.token());
         verify(userEntityRepository).findByEmail("john@test.com");
         verify(userEntityRepository).save(any(UserEntity.class));
         verify(jwtService, never()).generateToken(any(), any(), any(), any());
@@ -125,7 +122,7 @@ class AuthServiceImplTest {
         TokenResponse result = authService.login(request);
 
         assertNotNull(result);
-        assertEquals("jwt-token", result.token());
+                assertEquals("jwt-token", result.token());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 

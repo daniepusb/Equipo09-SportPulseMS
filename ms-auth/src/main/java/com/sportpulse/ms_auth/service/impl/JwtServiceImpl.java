@@ -51,10 +51,10 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
 
         return TokenResponse.builder()
-                .token(token)
-                .tokenType("Bearer")
-                .expiresIn(TimeUnit.MILLISECONDS.toSeconds(expirationTime))
-                .userId(userId)
+            .token(token)
+            .tokenType("Bearer")
+            .expiresIn(TimeUnit.MILLISECONDS.toSeconds(expirationTime))
+            .userId(userId)
                 .build();
     }
 
