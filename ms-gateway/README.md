@@ -11,10 +11,10 @@ El gateway redirige las peticiones según el prefijo del path hacia los microser
 | `/api/auth/**` | `ms-auth` | 8081 |
 | `/api/leagues/**` | `ms-leagues` | 8082 |
 | `/api/teams/**` | `ms-teams` | 8083 |
-| `/api/fixtures/**` | `ms-fixtures` | 8084 |
-| `/api/standings/**` | `ms-standings` | 8085 |
-| `/api/notifications/**` | `ms-notifications` | 8086 |
-| `/api/dashboard/**` | `ms-dashboard` | 8087 |
+| `/api/fixtures/**` | `ms-fixtures` | 8085 |
+| `/api/standings/**` | `ms-standings` | 8086 |
+| `/api/notifications/**` | `ms-notifications` | 8088 |
+| `/api/dashboard/**` | `ms-dashboard` | 8089 |
 
 ## 🛠️ Características Principales
 

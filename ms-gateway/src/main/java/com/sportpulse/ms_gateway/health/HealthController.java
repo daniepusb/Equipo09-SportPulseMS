@@ -21,13 +21,13 @@ public class HealthController {
     private String leaguesUrl;
     @Value("${TEAMS_SERVICE_URL:http://localhost:8083}")
     private String teamsUrl;
-    @Value("${FIXTURES_SERVICE_URL:http://localhost:8084}")
+    @Value("${FIXTURES_SERVICE_URL:http://localhost:8085}")
     private String fixturesUrl;
-    @Value("${STANDINGS_SERVICE_URL:http://localhost:8085}")
+    @Value("${STANDINGS_SERVICE_URL:http://localhost:8086}")
     private String standingsUrl;
-    @Value("${NOTIFICATIONS_SERVICE_URL:http://localhost:8086}")
+    @Value("${NOTIFICATIONS_SERVICE_URL:http://localhost:8088}")
     private String notificationsUrl;
-    @Value("${DASHBOARD_SERVICE_URL:http://localhost:8087}")
+    @Value("${DASHBOARD_SERVICE_URL:http://localhost:8089}")
     private String dashboardUrl;
 
     private final WebClient webClient = WebClient.create();
