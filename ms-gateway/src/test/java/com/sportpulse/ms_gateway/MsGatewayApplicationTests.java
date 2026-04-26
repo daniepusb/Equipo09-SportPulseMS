@@ -3,9 +3,11 @@ package com.sportpulse.ms_gateway;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @TestPropertySource(properties = {
     "SERVER_PORT=8080",
     "AUTH_SERVICE_URL=http://localhost:8081",

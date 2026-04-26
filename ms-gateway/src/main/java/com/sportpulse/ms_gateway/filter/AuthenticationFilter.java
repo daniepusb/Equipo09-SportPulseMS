@@ -3,6 +3,7 @@ package com.sportpulse.ms_gateway.filter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.sportpulse.ms_gateway.config.ApiPathConstants;
 import com.sportpulse.ms_gateway.config.RouterValidator;
 import com.sportpulse.ms_gateway.dto.ErrorResponse;
 import com.sportpulse.ms_gateway.dto.TokenPayload;
@@ -39,7 +40,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         this.routerValidator = routerValidator;
     }
 
-    public static class Config {}
+    public static class Config {
+    }
 
     @Override
     public GatewayFilter apply(Config config) {
@@ -47,7 +49,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             ServerHttpRequest request = exchange.getRequest();
 
             // 1. Verificar si la ruta requiere autenticación
-            if (routerValidator.isSecured.test(request)) {
+            if (routerValidator.isSecured(request)) {
                 
                 // 2. Verificar si existe el header Authorization
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
@@ -62,7 +64,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                 // 3. Validar token contra el microservicio ms-auth
                 return webClientBuilder.build()
                         .post()
-                        .uri(authServiceUrl + "/api/auth/validate")
+                    .uri(authServiceUrl + ApiPathConstants.AUTH_VALIDATE)
                         .header(HttpHeaders.AUTHORIZATION, authHeader)
                         .retrieve()
                         .bodyToMono(TokenPayload.class)

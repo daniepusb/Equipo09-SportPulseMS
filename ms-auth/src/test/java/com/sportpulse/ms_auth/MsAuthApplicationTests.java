@@ -2,9 +2,11 @@ package com.sportpulse.ms_auth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @TestPropertySource(properties = {
     "DB_HOST=localhost",
     "DB_PORT=5432",

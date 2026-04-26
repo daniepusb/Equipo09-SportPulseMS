@@ -1,20 +1,10 @@
 spring:
   application:
     name: ms-teams
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
 api-football:
   base-url: ${API_FOOTBALL_BASE_URL:https://v3.football.api-sports.io}
   host: ${API_FOOTBALL_HOST:v3.football.api-sports.io}
   key: ${RAPIDAPI_KEY}
-
-server:
-  port: ${SERVER_PORT}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health
-  endpoint:
-    health:
-      show-details: always

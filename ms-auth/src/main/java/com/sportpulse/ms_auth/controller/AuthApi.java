@@ -1,5 +1,6 @@
 package com.sportpulse.ms_auth.controller;
 
+import com.sportpulse.ms_auth.common.constants.ApiPaths;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
 import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping("/api/auth")
+@RequestMapping(ApiPaths.AUTH_BASE)
 @Tag(name = "Auth", description = "Authentication and user management operations")
 public interface AuthApi {
 
@@ -34,7 +35,7 @@ public interface AuthApi {
             @ApiResponse(responseCode = "409", description = "Email is already registered",
                     content = @Content(schema = @Schema(implementation = Object.class)))
     })
-    @PostMapping("/register")
+        @PostMapping(ApiPaths.REGISTER)
     ResponseEntity<RegisterResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest);
 
     @Operation(
@@ -49,7 +50,7 @@ public interface AuthApi {
             @ApiResponse(responseCode = "401", description = "Invalid credentials",
                     content = @Content(schema = @Schema(implementation = Object.class)))
     })
-    @PostMapping("/login")
+        @PostMapping(ApiPaths.LOGIN)
     ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest);
 
     @Operation(
@@ -65,6 +66,6 @@ public interface AuthApi {
             @ApiResponse(responseCode = "400", description = "Authorization header required and must start with 'Bearer '",
                     content = @Content)
     })
-    @PostMapping("/validate")
+        @PostMapping(ApiPaths.VALIDATE)
     ResponseEntity<TokenPayload> validateToken(@RequestHeader("Authorization") String authHeader);
 }
