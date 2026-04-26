@@ -64,11 +64,11 @@ class LeagueServiceTest {
         when(leagueRepository.findById(140L)).thenReturn(league);
 
         // When
-        var result = leagueService.getLeagueById(1L);
+        var result = leagueService.getLeagueById(140L);
 
         // Then
         assertNotNull(result);
-        assertEquals("Premier League", result.name());
-        verify(leagueRepository).findById(1L);
+        assertEquals("La Liga", result.name());
+        verify(leagueRepository).findById(140L);
     }
 }
