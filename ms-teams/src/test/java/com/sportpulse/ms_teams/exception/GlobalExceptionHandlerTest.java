@@ -1,5 +1,9 @@
 package com.sportpulse.ms_teams.exception;
+
 import com.sportpulse.ms_teams.controller.TeamsController;
+import com.sportpulse.ms_teams.constants.ErrorCodes;
+import com.sportpulse.ms_teams.constants.HeaderConstants;
+import com.sportpulse.ms_teams.constants.ResponseFields;
 import com.sportpulse.ms_teams.mapper.TeamMapper;
 import com.sportpulse.ms_teams.service.TeamService;
 import org.junit.jupiter.api.Test;
@@ -30,11 +34,11 @@ class GlobalExceptionHandlerTest {
     void whenLeagueMissing_thenReturns400() throws Exception {
         mockMvc.perform(get("/api/teams")
                 .param("season", "2024")
-                .header("X-User-Id", "test-user"))
+                .header(HeaderConstants.X_USER_ID, "test-user"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error").value("MISSING_PARAMETER"))
-            .andExpect(jsonPath("$.message").exists())
-            .andExpect(jsonPath("$.timestamp").exists());
+            .andExpect(jsonPath("$.error").value(ErrorCodes.MISSING_PARAMETER))
+            .andExpect(jsonPath("$." + ResponseFields.MESSAGE).exists())
+            .andExpect(jsonPath("$." + ResponseFields.TIMESTAMP).exists());
     }
 
     @Test
@@ -42,8 +46,8 @@ class GlobalExceptionHandlerTest {
         when(teamService.getTeamById(999L)).thenReturn(null);
 
         mockMvc.perform(get("/api/teams/999")
-                .header("X-User-Id", "test-user"))
+                .header(HeaderConstants.X_USER_ID, "test-user"))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.error").value("TEAM_NOT_FOUND"));
+            .andExpect(jsonPath("$.error").value(ErrorCodes.TEAM_NOT_FOUND));
     }
 }

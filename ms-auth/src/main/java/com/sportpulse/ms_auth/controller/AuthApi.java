@@ -1,6 +1,7 @@
 package com.sportpulse.ms_auth.controller;
 
 import com.sportpulse.ms_auth.common.constants.ApiPaths;
+import com.sportpulse.ms_auth.common.constants.HeaderConstants;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
 import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
@@ -67,5 +68,5 @@ public interface AuthApi {
                     content = @Content)
     })
         @PostMapping(ApiPaths.VALIDATE)
-    ResponseEntity<TokenPayload> validateToken(@RequestHeader("Authorization") String authHeader);
+        ResponseEntity<TokenPayload> validateToken(@RequestHeader(HeaderConstants.AUTHORIZATION) String authHeader);
 }

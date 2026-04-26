@@ -2,6 +2,8 @@ package com.sportpulse.ms_gateway.exception;
 
 import java.time.Instant;
 
+import com.sportpulse.ms_gateway.constants.GatewayErrorCodes;
+import com.sportpulse.ms_gateway.constants.GatewayMessages;
 import com.sportpulse.ms_gateway.dto.ErrorResponse;
 
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
@@ -39,8 +41,8 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             message = reason != null ? reason : status.getReasonPhrase();
         } else {
             status = HttpStatus.SERVICE_UNAVAILABLE;
-            error = "SERVICE_UNAVAILABLE";
-            message = "Service is currently unavailable. Please try again later.";
+            error = GatewayErrorCodes.SERVICE_UNAVAILABLE;
+            message = GatewayMessages.SERVICE_UNAVAILABLE;
         }
 
         exchange.getResponse().setStatusCode(status);

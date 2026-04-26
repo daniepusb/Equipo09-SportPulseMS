@@ -1,5 +1,6 @@
 package com.sportpulse.ms_auth.exception;
 
+import com.sportpulse.ms_auth.common.constants.ErrorCodes;
 import com.sportpulse.ms_auth.common.exception.AccessDeniedException;
 import com.sportpulse.ms_auth.common.exception.DuplicateEmailException;
 import com.sportpulse.ms_auth.common.exception.GlobalExceptionHandler;
@@ -39,7 +40,7 @@ class GlobalExceptionHandlerTest {
                 new InvalidCredentialsException("Invalid credentials"), request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("INVALID_CREDENTIALS", response.getBody().error());
+        assertEquals(ErrorCodes.INVALID_CREDENTIALS, response.getBody().error());
         assertEquals("Invalid credentials", response.getBody().message());
         assertNotNull(response.getBody().timestamp());
         assertTrue(response.getBody().timestamp().toString().endsWith("Z"));
@@ -51,7 +52,7 @@ class GlobalExceptionHandlerTest {
                 new BadCredentialsException("Bad credentials"), request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("INVALID_CREDENTIALS", response.getBody().error());
+        assertEquals(ErrorCodes.INVALID_CREDENTIALS, response.getBody().error());
         assertEquals("Invalid credentials", response.getBody().message());
         assertNotNull(response.getBody().timestamp());
     }
@@ -62,7 +63,7 @@ class GlobalExceptionHandlerTest {
                 new AccessDeniedException("Access denied"), request);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("ACCESS_DENIED", response.getBody().error());
+        assertEquals(ErrorCodes.ACCESS_DENIED, response.getBody().error());
         assertEquals("Access denied", response.getBody().message());
         assertNotNull(response.getBody().timestamp());
     }
@@ -73,7 +74,7 @@ class GlobalExceptionHandlerTest {
                 new DuplicateEmailException("A user with that email already exists"), request);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("USER_ALREADY_EXISTS", response.getBody().error());
+        assertEquals(ErrorCodes.USER_ALREADY_EXISTS, response.getBody().error());
         assertEquals("A user with that email already exists", response.getBody().message());
         assertNotNull(response.getBody().timestamp());
     }
@@ -90,7 +91,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleValidationErrors(ex, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("VALIDATION_ERROR", response.getBody().error());
+        assertEquals(ErrorCodes.VALIDATION_ERROR, response.getBody().error());
         assertTrue(response.getBody().message().contains("email"));
         assertNotNull(response.getBody().timestamp());
     }
