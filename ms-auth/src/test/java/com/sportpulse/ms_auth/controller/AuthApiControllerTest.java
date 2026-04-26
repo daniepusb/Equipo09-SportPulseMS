@@ -3,6 +3,7 @@ package com.sportpulse.ms_auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import com.sportpulse.ms_auth.repository.UserEntityRepository;
 import com.sportpulse.ms_auth.service.AuthService;

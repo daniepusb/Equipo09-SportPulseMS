@@ -3,6 +3,7 @@ package com.sportpulse.ms_auth.service.impl;
 import com.sportpulse.ms_auth.common.exception.DuplicateEmailException;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenPayload;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import com.sportpulse.ms_auth.common.model.entities.UserEntity;
@@ -34,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
 
     @Override
-    public TokenResponse createUser(@Valid RegisterRequest registerRequest) {
+    public RegisterResponse createUser(@Valid RegisterRequest registerRequest) {
         log.info("Intentando crear usuario para email: {}", registerRequest.email());
 
         if (userEntityRepository.findByEmail(registerRequest.email()).isPresent()) {
@@ -49,11 +50,12 @@ public class AuthServiceImpl implements AuthService {
         UserEntity userCreated = userEntityRepository.save(userToSave);
         log.info("Usuario creado exitosamente con ID: {}", userCreated.getId());
 
-        return jwtService.generateToken(
-                userCreated.getEmail(),
-                userCreated.getId().toString(),
-                userCreated.getUsername(),
-                userCreated.getRole().name());
+        return new RegisterResponse(
+            userCreated.getId().toString(),
+            userCreated.getUsername(),
+            userCreated.getEmail(),
+            userCreated.getRole().name(),
+            userCreated.getCreatedAt());
     }
 
     @Override
