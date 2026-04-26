@@ -16,6 +16,9 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     UserEntity toUserEntity(RegisterRequest request);
 
-    @Mapping(target = "accessToken", source = "token")
+    @Mapping(target = "token", source = "token")
+    @Mapping(target = "tokenType", constant = "Bearer")
+    @Mapping(target = "expiresIn", constant = "3600L")
+    @Mapping(target = "userId", ignore = true)
     TokenResponse toTokenResponse(String token);
 }

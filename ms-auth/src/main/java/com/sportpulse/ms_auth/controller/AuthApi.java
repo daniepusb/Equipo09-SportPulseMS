@@ -2,6 +2,7 @@ package com.sportpulse.ms_auth.controller;
 
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenPayload;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +35,7 @@ public interface AuthApi {
                     content = @Content(schema = @Schema(implementation = Object.class)))
     })
     @PostMapping("/register")
-    ResponseEntity<TokenResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest);
+    ResponseEntity<RegisterResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest);
 
     @Operation(
             summary = "User Login",
