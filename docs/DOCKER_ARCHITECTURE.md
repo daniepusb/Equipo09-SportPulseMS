@@ -19,10 +19,10 @@ graph TB
     Auth[ms-auth :8081<br/>JWT + Users]
     Leagues[ms-leagues :8082<br/>Leagues]
     Teams[ms-teams :8083<br/>Teams]
-    Fixtures[ms-fixtures :8084<br/>Fixtures]
-    Standings[ms-standings :8085<br/>Standings]
-    Notifications[ms-notifications :8086<br/>Alerts]
-    Dashboard[ms-dashboard :8087<br/>Aggregator]
+    Fixtures[ms-fixtures :8085<br/>Fixtures]
+    Standings[ms-standings :8086<br/>Standings]
+    Notifications[ms-notifications :8088<br/>Alerts]
+    Dashboard[ms-dashboard :8089<br/>Aggregator]
   end
 
   subgraph "Data Layer"
@@ -82,10 +82,10 @@ An internal bridge network named `sportpulse-internal-network` is used.
 | **ms-auth**                |     8081      |     8081      | Identity management, login, and JWT token issuance. |
 | **ms-leagues**             |     8082      |     8082      | Management of leagues, countries, and seasons.      |
 | **ms-teams**               |     8083      |     8083      | Detailed team information and badges.               |
-| **ms-fixtures**            |     8084      |     8084      | Fixture schedule and real-time results.             |
-| **ms-standings**           |     8085      |     8085      | Standings and season statistics.                    |
-| **ms-notifications**       |     8086      |     8086      | Subscription system and event alerts.               |
-| **ms-dashboard**           |     8087      |     8087      | Data aggregator for the executive view.             |
+| **ms-fixtures**            |     8085      |     8085      | Fixture schedule and real-time results.             |
+| **ms-standings**           |     8086      |     8086      | Standings and season statistics.                    |
+| **ms-notifications**       |     8088      |     8088      | Subscription system and event alerts.               |
+| **ms-dashboard**           |     8089      |     8089      | Data aggregator for the executive view.             |
 | **postgres-auth**          |      N/A      |     5432      | Persistent database for users (PostgreSQL).         |
 | **postgres-notifications** |      N/A      |     5432      | Database for subscriptions (PostgreSQL).            |
 
@@ -97,10 +97,10 @@ An internal bridge network named `sportpulse-internal-network` is used.
 | **ms-auth**          | postgres-auth          | `jdbc:postgresql://postgres-auth:5432/auth_db`                   | Credential persistence.                  |
 | **ms-fixtures**      | ms-teams               | `http://ms-teams:8083`                                           | Retrieves team information for fixtures. |
 | **ms-standings**     | ms-teams               | `http://ms-teams:8083`                                           | Team information for standings tables.   |
-| **ms-notifications** | ms-fixtures            | `http://ms-fixtures:8084`                                        | Monitors fixtures to trigger alerts.     |
+| **ms-notifications** | ms-fixtures            | `http://ms-fixtures:8085`                                        | Monitors fixtures to trigger alerts.     |
 | **ms-notifications** | postgres-notifications | `jdbc:postgresql://postgres-notifications:5432/notifications_db` | Subscriber registration.                 |
-| **ms-dashboard**     | ms-fixtures            | `http://ms-fixtures:8084`                                        | Recent fixture data for the summary.     |
-| **ms-dashboard**     | ms-standings           | `http://ms-standings:8085`                                       | Standings data for the summary.          |
+| **ms-dashboard**     | ms-fixtures            | `http://ms-fixtures:8085`                                        | Recent fixture data for the summary.     |
+| **ms-dashboard**     | ms-standings           | `http://ms-standings:8086`                                       | Standings data for the summary.          |
 
 ## Development Configuration
 
