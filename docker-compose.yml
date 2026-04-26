@@ -1,8 +1,7 @@
-version: '3.8'
-
 x-common-env: &common-env
   JWT_SECRET: ${JWT_SECRET}
   RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
 
 x-healthcheck-defaults: &healthcheck-defaults
   interval: 10s
@@ -31,7 +30,7 @@ services:
       resources:
         limits:
           memory: ${REDIS_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   postgres-auth:
     image: postgres:15-alpine
@@ -55,7 +54,7 @@ services:
       resources:
         limits:
           memory: ${AUTH_DB_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   postgres-notifications:
     image: postgres:15-alpine
@@ -79,7 +78,7 @@ services:
       resources:
         limits:
           memory: ${NOTIF_DB_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-auth:
     build: ./ms-auth
@@ -112,7 +111,7 @@ services:
       resources:
         limits:
           memory: ${AUTH_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-leagues:
     build: ./ms-leagues
@@ -130,7 +129,7 @@ services:
       resources:
         limits:
           memory: ${LEAGUES_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-teams:
     build: ./ms-teams
@@ -148,7 +147,7 @@ services:
       resources:
         limits:
           memory: ${TEAMS_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-fixtures:
     build: ./ms-fixtures
@@ -170,7 +169,7 @@ services:
       resources:
         limits:
           memory: ${FIXTURES_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-standings:
     build: ./ms-standings
@@ -192,7 +191,7 @@ services:
       resources:
         limits:
           memory: ${STANDINGS_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-notifications:
     build: ./ms-notifications
@@ -219,7 +218,7 @@ services:
       resources:
         limits:
           memory: ${NOTIF_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-dashboard:
     build: ./ms-dashboard
@@ -247,7 +246,7 @@ services:
       resources:
         limits:
           memory: ${DASHBOARD_MEM_LIMIT}
-          cpus: '0.5'
+          cpus: "0.5"
 
   ms-gateway:
     build: ./ms-gateway
@@ -275,6 +274,7 @@ services:
       redis:
         condition: service_healthy
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
       LEAGUES_SERVICE_URL: ${LEAGUES_SERVICE_URL}
       TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
@@ -294,7 +294,7 @@ services:
       resources:
         limits:
           memory: ${GATEWAY_MEM_LIMIT}
-          cpus: '1.0'
+          cpus: "1.0"
 
 volumes:
   postgres-auth-data:
