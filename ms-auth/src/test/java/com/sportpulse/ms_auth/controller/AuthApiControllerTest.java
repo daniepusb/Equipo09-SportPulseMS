@@ -82,8 +82,8 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.message").value("El email ya está registrado."));
+            .andExpect(jsonPath("$.error").value("USER_ALREADY_EXISTS"))
+            .andExpect(jsonPath("$.message").value("A user with that email already exists"));
     }
 
     @Test
@@ -94,7 +94,8 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+            .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+            .andExpect(jsonPath("$.message").value("email: Invalid email format"));
     }
 
     @Test
@@ -196,7 +197,8 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.status").value(401));
+            .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"))
+            .andExpect(jsonPath("$.message").value("Invalid credentials"));
     }
 
     @Test
@@ -207,7 +209,8 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.status").value(401));
+            .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"))
+           .andExpect(jsonPath("$.message").value("Invalid credentials"));
     }
 
     @Test
@@ -218,7 +221,7 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+            .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -229,7 +232,7 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+            .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -240,7 +243,7 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+            .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -258,15 +261,16 @@ class AuthApiControllerTest {
                 .andExpect(jsonPath("$.role").value("USER"));
     }
 
-    @Test
+   @Test
     void validate_withInvalidToken_returns200WithValidFalse() throws Exception {
         mockMvc.perform(post("/api/auth/validate")
                         .header("Authorization", "Bearer invalid-token"))
-                .andExpect(status().isOk())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.valid").value(false))
-                .andExpect(jsonPath("$.userId").isEmpty())
-                .andExpect(jsonPath("$.username").isEmpty())
-                .andExpect(jsonPath("$.role").isEmpty());
+                .andExpect(jsonPath("$.userId").doesNotExist())
+                .andExpect(jsonPath("$.username").doesNotExist())
+                .andExpect(jsonPath("$.role").doesNotExist())
+                .andExpect(jsonPath("$.error").value("TOKEN_EXPIRED"));
     }
 
     @Test

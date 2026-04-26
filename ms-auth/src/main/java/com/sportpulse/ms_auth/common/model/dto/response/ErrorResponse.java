@@ -3,24 +3,17 @@ package com.sportpulse.ms_auth.common.model.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Builder
-@Schema(description = "Respuesta de error estándar de la API")
+@Schema(description = "Standard response of the API")
 public record ErrorResponse(
-        @Schema(description = "Timestamp del error", example = "2026-04-23T16:30:00")
-        LocalDateTime timestamp,
-
-        @Schema(description = "Código HTTP del error", example = "400")
-        int status,
-
-        @Schema(description = "Nombre del error HTTP", example = "Bad Request")
+        @Schema(description = "Machine-readable error code", example = "USER_ALREADY_EXISTS")
         String error,
 
-        @Schema(description = "Mensaje descriptivo del error", example = "Password must be at least 8 characters")
+        @Schema(description = "Descriptive message of the error", example = "Ya existe un usuario con ese email")
         String message,
 
-        @Schema(description = "Path de la solicitud que falló", example = "/api/auth/register")
-        String path
-) {
+        @Schema(description = "Timestamp of the error", example = "2025-01-15T10:30:00Z")
+        Instant timestamp){
 }
