@@ -3,6 +3,7 @@ package com.sportpulse.ms_auth.service;
 import com.sportpulse.ms_auth.common.exception.DuplicateEmailException;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import com.sportpulse.ms_auth.common.model.entities.UserEntity;
 import com.sportpulse.ms_auth.common.model.mapper.UserMapper;
@@ -59,28 +60,32 @@ class AuthServiceImplTest {
     void createUser_success() {
         RegisterRequest request = new RegisterRequest("john", "john@test.com", "Password1");
         UUID userId = UUID.randomUUID();
+        Instant createdAt = Instant.now();
         UserEntity savedUser = UserEntity.builder()
                 .id(userId)
                 .username("john")
                 .email("john@test.com")
                 .password("encoded")
                 .role(com.sportpulse.ms_auth.common.enums.UserRole.USER)
-                .createdAt(Instant.now())
+                .createdAt(createdAt)
                 .build();
-        TokenResponse tokenResponse = new TokenResponse("jwt-token");
 
         when(userEntityRepository.findByEmail("john@test.com")).thenReturn(Optional.empty());
         when(userMapper.toUserEntity(any(RegisterRequest.class))).thenReturn(savedUser);
         when(passwordEncoder.encode("Password1")).thenReturn("encoded");
         when(userEntityRepository.save(any(UserEntity.class))).thenReturn(savedUser);
-        when(jwtService.generateToken("john@test.com", userId.toString(), "john", "USER")).thenReturn(tokenResponse);
 
-        TokenResponse result = authService.createUser(request);
+        RegisterResponse result = authService.createUser(request);
 
         assertNotNull(result);
-        assertEquals("jwt-token", result.accessToken());
+        assertEquals(userId.toString(), result.id());
+        assertEquals("john", result.username());
+        assertEquals("john@test.com", result.email());
+        assertEquals("USER", result.role());
+        assertEquals(createdAt, result.createdAt());
         verify(userEntityRepository).findByEmail("john@test.com");
         verify(userEntityRepository).save(any(UserEntity.class));
+        verify(jwtService, never()).generateToken(any(), any(), any(), any());
     }
 
     @Test
@@ -110,7 +115,7 @@ class AuthServiceImplTest {
                 .role(com.sportpulse.ms_auth.common.enums.UserRole.USER)
                 .build();
         Authentication authentication = mock(Authentication.class);
-        TokenResponse tokenResponse = new TokenResponse("jwt-token");
+        TokenResponse tokenResponse = new TokenResponse("jwt-token", "Bearer", 3600L, userId.toString());
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
@@ -120,7 +125,7 @@ class AuthServiceImplTest {
         TokenResponse result = authService.login(request);
 
         assertNotNull(result);
-        assertEquals("jwt-token", result.accessToken());
+        assertEquals("jwt-token", result.token());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 

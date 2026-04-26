@@ -3,6 +3,7 @@ package com.sportpulse.ms_auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import com.sportpulse.ms_auth.repository.UserEntityRepository;
 import com.sportpulse.ms_auth.service.AuthService;
@@ -61,12 +62,17 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").exists())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.username").value("john"))
+            .andExpect(jsonPath("$.email").value("john@test.com"))
+            .andExpect(jsonPath("$.role").value("USER"))
+            .andExpect(jsonPath("$.createdAt").exists())
                 .andReturn();
 
-        TokenResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), TokenResponse.class);
-        assertNotNull(response.accessToken());
+        RegisterResponse response = objectMapper.readValue(
+            result.getResponse().getContentAsString(), RegisterResponse.class);
+        assertNotNull(response.id());
+        assertTrue(response.createdAt().toString().endsWith("Z"));
     }
 
     @Test
@@ -170,12 +176,15 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").exists())
+                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.expiresIn").isNumber())
+                .andExpect(jsonPath("$.userId").exists())
                 .andReturn();
 
         TokenResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(), TokenResponse.class);
-        assertNotNull(response.accessToken());
+        assertNotNull(response.token());
     }
 
     @Test
@@ -239,8 +248,10 @@ class AuthApiControllerTest {
     @Test
     void validate_withValidToken_returns200() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("john", "john@test.com", "Password1");
-        TokenResponse tokenResponse = authService.createUser(registerRequest);
-        String token = tokenResponse.accessToken();
+        authService.createUser(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("john@test.com", "Password1");
+        TokenResponse tokenResponse = authService.login(loginRequest);
+        String token = tokenResponse.token();
 
         mockMvc.perform(post("/api/auth/validate")
                         .header("Authorization", "Bearer " + token))
