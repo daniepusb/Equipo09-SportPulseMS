@@ -62,15 +62,16 @@ class AuthApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.token").exists())
-            .andExpect(jsonPath("$.tokenType").value("Bearer"))
-            .andExpect(jsonPath("$.expiresIn").isNumber())
-            .andExpect(jsonPath("$.userId").exists())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.username").value("john"))
+                .andExpect(jsonPath("$.email").value("john@test.com"))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").exists())
                 .andReturn();
 
-        TokenResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), TokenResponse.class);
-        assertNotNull(response.token());
+        RegisterResponse response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), RegisterResponse.class);
+        assertNotNull(response.id());
     }
 
     @Test
@@ -249,7 +250,11 @@ class AuthApiControllerTest {
     @Test
     void validate_withValidToken_returns200() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("john", "john@test.com", "Password1");
-        TokenResponse tokenResponse = authService.createUser(registerRequest);
+        authService.createUser(registerRequest);
+
+        // Login para obtener el token
+        LoginRequest loginRequest = new LoginRequest("john@test.com", "Password1");
+        TokenResponse tokenResponse = authService.login(loginRequest); // ajusta al método real
         String token = tokenResponse.token();
 
         mockMvc.perform(post("/api/auth/validate")
