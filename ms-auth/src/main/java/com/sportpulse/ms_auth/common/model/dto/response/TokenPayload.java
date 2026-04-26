@@ -1,7 +1,10 @@
 package com.sportpulse.ms_auth.common.model.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Payload with user information extracted from the JWT token")
 public record TokenPayload(
         @Schema(description = "Indica si el token es válido", example = "true")
@@ -17,6 +20,9 @@ public record TokenPayload(
         String role,
 
         @Schema(description = "Error code if the token is not valid", example = "TOKEN_EXPIRED", nullable = true)
-        String error
+        String error,
+
+        @Schema(description = "Descriptive message of the error if the token is not valid", example = "The token has expired", nullable = true)
+        String message
 ) {
 }

@@ -19,7 +19,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
@@ -35,60 +34,52 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleInvalidCredentials_returns401() {
-        when(request.getRequestURI()).thenReturn("/api/auth/login");
-
+    void handleInvalidCredentialsReturns401() {
         ResponseEntity<ErrorResponse> response = handler.handleInvalidCredentials(
-                new InvalidCredentialsException("Credenciales incorrectas"), request);
+                new InvalidCredentialsException("Invalid credentials"), request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals(401, response.getBody().status());
-        assertEquals("Credenciales incorrectas", response.getBody().message());
-        assertEquals("/api/auth/login", response.getBody().path());
+        assertEquals("INVALID_CREDENTIALS", response.getBody().error());
+        assertEquals("Invalid credentials", response.getBody().message());
         assertNotNull(response.getBody().timestamp());
+        assertTrue(response.getBody().timestamp().toString().endsWith("Z"));
     }
 
     @Test
-    void handleBadCredentials_returns401() {
-        when(request.getRequestURI()).thenReturn("/api/auth/login");
-
+    void handleBadCredentialsReturns401() {
         ResponseEntity<ErrorResponse> response = handler.handleBadCredentials(
                 new BadCredentialsException("Bad credentials"), request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("INVALID_CREDENTIALS", response.getBody().message());
+        assertEquals("INVALID_CREDENTIALS", response.getBody().error());
+        assertEquals("Invalid credentials", response.getBody().message());
+        assertNotNull(response.getBody().timestamp());
     }
 
     @Test
-    void handleAccessDenied_returns403() {
-        when(request.getRequestURI()).thenReturn("/api/admin/users");
-
+    void handleAccessDeniedReturns403() {
         ResponseEntity<ErrorResponse> response = handler.handleAccessDenied(
-                new AccessDeniedException("Acceso denegado"), request);
+                new AccessDeniedException("Access denied"), request);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals(403, response.getBody().status());
-        assertEquals("Acceso denegado", response.getBody().message());
-        assertEquals("Forbidden", response.getBody().error());
+        assertEquals("ACCESS_DENIED", response.getBody().error());
+        assertEquals("Access denied", response.getBody().message());
+        assertNotNull(response.getBody().timestamp());
     }
 
     @Test
-    void handleDuplicateEmail_returns409() {
-        when(request.getRequestURI()).thenReturn("/api/auth/register");
-
+    void handleDuplicateEmailReturns409() {
         ResponseEntity<ErrorResponse> response = handler.handleDuplicateEmail(
-                new DuplicateEmailException("El email ya está registrado"), request);
+                new DuplicateEmailException("A user with that email already exists"), request);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals(409, response.getBody().status());
-        assertEquals("El email ya está registrado", response.getBody().message());
-        assertEquals("Conflict", response.getBody().error());
+        assertEquals("USER_ALREADY_EXISTS", response.getBody().error());
+        assertEquals("A user with that email already exists", response.getBody().message());
+        assertNotNull(response.getBody().timestamp());
     }
 
     @Test
-    void handleValidationErrors_returns400() {
-        when(request.getRequestURI()).thenReturn("/api/auth/register");
-
+    void handleValidationErrorsReturns400() {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
                 new Object(), "registerRequest");
         bindingResult.addError(new FieldError("registerRequest", "email", "must be a valid email"));
@@ -99,7 +90,8 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleValidationErrors(ex, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(400, response.getBody().status());
+        assertEquals("VALIDATION_ERROR", response.getBody().error());
         assertTrue(response.getBody().message().contains("email"));
+        assertNotNull(response.getBody().timestamp());
     }
 }

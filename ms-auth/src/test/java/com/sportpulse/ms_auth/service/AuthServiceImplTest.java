@@ -95,7 +95,7 @@ class AuthServiceImplTest {
                 () -> authService.createUser(request)
         );
 
-        assertEquals("El email ya está registrado.", exception.getMessage());
+        assertEquals("USER_ALREADY_EXISTS", exception.getMessage());
         verify(userEntityRepository, never()).save(any());
     }
 

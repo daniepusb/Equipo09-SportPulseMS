@@ -59,24 +59,25 @@ public class JwtServiceImpl implements JwtService {
         try {
             Claims claims = getClaims(token);
             if (claims.getExpiration().before(new Date())) {
-                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED");
+                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED", "The token has expired");
             }
             return new TokenPayload(
                     true,
                     claims.get("userId", String.class),
                     claims.get("username", String.class),
                     claims.get("role", String.class),
+                    null,
                     null
             );
         } catch (IllegalArgumentException e) {
             if (e.getMessage() != null && e.getMessage().contains("expirado")) {
-                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED");
+                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED", "The token has expired");
             }
             log.warn("Token JWT inválido: {}", e.getMessage());
-            return new TokenPayload(false, null, null, null, "INVALID_TOKEN");
+            return new TokenPayload(false, null, null, null, "INVALID_TOKEN", "The token is invalid");
         } catch (Exception e) {
             log.warn("Token JWT inválido: {}", e.getMessage());
-            return new TokenPayload(false, null, null, null, "INVALID_TOKEN");
+            return new TokenPayload(false, null, null, null, "INVALID_TOKEN", "The token is invalid");
         }
     }
 
