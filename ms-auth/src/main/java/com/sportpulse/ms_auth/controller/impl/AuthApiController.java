@@ -2,6 +2,7 @@ package com.sportpulse.ms_auth.controller.impl;
 
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenPayload;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import com.sportpulse.ms_auth.controller.AuthApi;
@@ -20,8 +21,8 @@ public class AuthApiController implements AuthApi {
     private final AuthService authService;
 
     @Override
-    public ResponseEntity<TokenResponse> createUser(@RequestBody @Valid RegisterRequest registerRequest) {
-        TokenResponse response = authService.createUser(registerRequest);
+    public ResponseEntity<RegisterResponse> createUser(@RequestBody @Valid RegisterRequest registerRequest) {
+        RegisterResponse response = authService.createUser(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

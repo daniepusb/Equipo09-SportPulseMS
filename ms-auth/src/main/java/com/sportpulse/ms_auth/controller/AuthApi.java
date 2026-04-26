@@ -2,6 +2,7 @@ package com.sportpulse.ms_auth.controller;
 
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
+import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenPayload;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,18 +24,18 @@ public interface AuthApi {
 
     @Operation(
             summary = "Registrar usuario",
-            description = "Crea un nuevo usuario en el sistema y retorna un token JWT"
+            description = "Crea un nuevo usuario en el sistema y retorna sus datos"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente",
-                    content = @Content(schema = @Schema(implementation = TokenResponse.class))),
+                    content = @Content(schema = @Schema(implementation = RegisterResponse.class))),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o password no cumple requisitos",
                     content = @Content(schema = @Schema(implementation = Object.class))),
             @ApiResponse(responseCode = "409", description = "El email ya está registrado",
                     content = @Content(schema = @Schema(implementation = Object.class)))
     })
     @PostMapping("/register")
-    ResponseEntity<TokenResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest);
+    ResponseEntity<RegisterResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest);
 
     @Operation(
             summary = "Iniciar sesión",
