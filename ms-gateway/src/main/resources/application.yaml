@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: ms-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   cloud:
     gateway:
       default-filters:
@@ -47,6 +49,3 @@ management:
     web:
       exposure:
         include: health,info,gateway
-  health:
-    redis:
-      enabled: false

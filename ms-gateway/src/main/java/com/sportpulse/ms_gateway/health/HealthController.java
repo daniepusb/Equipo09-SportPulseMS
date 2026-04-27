@@ -1,5 +1,6 @@
 package com.sportpulse.ms_gateway.health;
 
+import com.sportpulse.ms_gateway.constants.HealthConstants;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +41,8 @@ public class HealthController {
             check(dashboardUrl)
         ).map(tuple -> {
             Map<String, Object> response = new HashMap<>();
-            response.put("gateway", "UP");
-            response.put("timestamp", Instant.now());
+            response.put(HealthConstants.KEY_GATEWAY, HealthConstants.STATUS_UP);
+            response.put(HealthConstants.KEY_TIMESTAMP, Instant.now());
 
             Map<String, String> services = new HashMap<>();
             services.put("ms-auth", tuple.getT1());
@@ -52,18 +53,18 @@ public class HealthController {
             services.put("ms-notifications", tuple.getT6());
             services.put("ms-dashboard", tuple.getT7());
 
-            response.put("services", services);
+            response.put(HealthConstants.KEY_SERVICES, services);
             return response;
         });
     }
 
     private Mono<String> check(String url) {
         return webClient.get()
-            .uri(url + "/actuator/health")
+            .uri(url + HealthConstants.ACTUATOR_HEALTH_PATH)
             .retrieve()
             .toBodilessEntity()
-            .map(response -> "UP")
+            .map(response -> HealthConstants.STATUS_UP)
             .timeout(java.time.Duration.ofSeconds(2))
-            .onErrorReturn("DOWN");
+            .onErrorReturn(HealthConstants.STATUS_DOWN);
     }
 }

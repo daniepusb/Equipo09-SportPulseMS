@@ -1,5 +1,6 @@
 package com.sportpulse.ms_auth.service.impl;
 
+import com.sportpulse.ms_auth.common.constants.ErrorCodes;
 import com.sportpulse.ms_auth.common.exception.DuplicateEmailException;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
@@ -40,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (userEntityRepository.findByEmail(registerRequest.email()).isPresent()) {
             log.warn("Intento de crear usuario con email existente: {}", registerRequest.email());
-            throw new DuplicateEmailException("USER_ALREADY_EXISTS");
+            throw new DuplicateEmailException(ErrorCodes.USER_ALREADY_EXISTS);
         }
 
         UserEntity userToSave = userMapper.toUserEntity(registerRequest);

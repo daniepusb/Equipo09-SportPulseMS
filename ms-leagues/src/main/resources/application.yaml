@@ -1,6 +1,8 @@
 spring:
   application:
     name: ms-leagues
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
 api-football:
   base-url: ${API_FOOTBALL_BASE_URL:https://v3.football.api-sports.io}

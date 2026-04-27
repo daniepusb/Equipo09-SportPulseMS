@@ -1,5 +1,7 @@
 package com.sportpulse.ms_auth.config;
 
+import com.sportpulse.ms_auth.common.constants.HeaderConstants;
+import com.sportpulse.ms_auth.common.constants.JwtConstants;
 import com.sportpulse.ms_auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,14 +38,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader(HeaderConstants.AUTHORIZATION);
 
-        if (!StringUtils.hasText(authHeader) || !authHeader.startsWith("Bearer ")) {
+        if (!StringUtils.hasText(authHeader) || !authHeader.startsWith(JwtConstants.BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwt = authHeader.substring(7);
+        final String jwt = authHeader.substring(JwtConstants.BEARER_PREFIX.length());
         final String userEmail;
 
         try {

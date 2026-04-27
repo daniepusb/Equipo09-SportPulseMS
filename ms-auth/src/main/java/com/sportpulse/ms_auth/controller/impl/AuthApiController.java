@@ -1,5 +1,7 @@
 package com.sportpulse.ms_auth.controller.impl;
 
+import com.sportpulse.ms_auth.common.constants.HeaderConstants;
+import com.sportpulse.ms_auth.common.constants.JwtConstants;
 import com.sportpulse.ms_auth.common.model.dto.request.LoginRequest;
 import com.sportpulse.ms_auth.common.model.dto.request.RegisterRequest;
 import com.sportpulse.ms_auth.common.model.dto.response.RegisterResponse;
@@ -33,8 +35,8 @@ public class AuthApiController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<TokenPayload> validateToken(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+    public ResponseEntity<TokenPayload> validateToken(@RequestHeader(HeaderConstants.AUTHORIZATION) String authHeader) {
+        String token = authHeader.replace(JwtConstants.BEARER_PREFIX, "");
         TokenPayload payload = authService.validateToken(token);
 
         if (payload.valid()) {

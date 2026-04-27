@@ -1,5 +1,7 @@
 package com.sportpulse.ms_gateway.exception;
 
+import com.sportpulse.ms_gateway.constants.GatewayErrorCodes;
+import com.sportpulse.ms_gateway.constants.GatewayMessages;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -62,8 +64,8 @@ class GlobalExceptionHandlerTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> response = objectMapper.readValue(body, Map.class);
 
-        assertEquals("SERVICE_UNAVAILABLE", response.get("error"));
-        assertEquals("Service is currently unavailable. Please try again later.", response.get("message"));
+        assertEquals(GatewayErrorCodes.SERVICE_UNAVAILABLE, response.get("error"));
+        assertEquals(GatewayMessages.SERVICE_UNAVAILABLE, response.get("message"));
         assertTrue(response.containsKey(TIMESTAMP));
         assertFalse(response.containsKey("status"));
         assertFalse(response.containsKey("path"));

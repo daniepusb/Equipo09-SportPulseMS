@@ -1,5 +1,8 @@
 package com.sportpulse.ms_auth.service.impl;
 
+import com.sportpulse.ms_auth.common.constants.ErrorCodes;
+import com.sportpulse.ms_auth.common.constants.ErrorMessages;
+import com.sportpulse.ms_auth.common.constants.JwtConstants;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenPayload;
 import com.sportpulse.ms_auth.common.model.dto.response.TokenResponse;
 import com.sportpulse.ms_auth.service.JwtService;
@@ -38,13 +41,15 @@ public class JwtServiceImpl implements JwtService {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + expirationTime);
 
-        String normalizedRole = role.startsWith("ROLE_") ? role.substring(5) : role;
+        String normalizedRole = role.startsWith(JwtConstants.ROLE_PREFIX)
+            ? role.substring(JwtConstants.ROLE_PREFIX.length())
+            : role;
 
         String token = Jwts.builder()
                 .subject(email)
-                .claim("userId", userId)
-                .claim("username", username)
-                .claim("role", normalizedRole)
+            .claim(JwtConstants.CLAIM_USER_ID, userId)
+            .claim(JwtConstants.CLAIM_USERNAME, username)
+            .claim(JwtConstants.CLAIM_ROLE, normalizedRole)
                 .issuedAt(now)
                 .expiration(expirationDate)
                 .signWith(secretKey)
@@ -52,7 +57,7 @@ public class JwtServiceImpl implements JwtService {
 
         return TokenResponse.builder()
             .token(token)
-            .tokenType("Bearer")
+            .tokenType(JwtConstants.TOKEN_TYPE_BEARER)
             .expiresIn(TimeUnit.MILLISECONDS.toSeconds(expirationTime))
             .userId(userId)
                 .build();
@@ -63,25 +68,25 @@ public class JwtServiceImpl implements JwtService {
         try {
             Claims claims = getClaims(token);
             if (claims.getExpiration().before(new Date())) {
-                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED", "The token has expired");
+                return new TokenPayload(false, null, null, null, ErrorCodes.TOKEN_EXPIRED, ErrorMessages.TOKEN_EXPIRED);
             }
             return new TokenPayload(
                     true,
-                    claims.get("userId", String.class),
-                    claims.get("username", String.class),
-                    claims.get("role", String.class),
+                    claims.get(JwtConstants.CLAIM_USER_ID, String.class),
+                    claims.get(JwtConstants.CLAIM_USERNAME, String.class),
+                    claims.get(JwtConstants.CLAIM_ROLE, String.class),
                     null,
                     null
             );
         } catch (IllegalArgumentException e) {
             if (e.getMessage() != null && e.getMessage().contains("expirado")) {
-                return new TokenPayload(false, null, null, null, "TOKEN_EXPIRED", "The token has expired");
+                return new TokenPayload(false, null, null, null, ErrorCodes.TOKEN_EXPIRED, ErrorMessages.TOKEN_EXPIRED);
             }
             log.warn("Token JWT inválido: {}", e.getMessage());
-            return new TokenPayload(false, null, null, null, "INVALID_TOKEN", "The token is invalid");
+            return new TokenPayload(false, null, null, null, ErrorCodes.INVALID_TOKEN, ErrorMessages.INVALID_TOKEN);
         } catch (Exception e) {
             log.warn("Token JWT inválido: {}", e.getMessage());
-            return new TokenPayload(false, null, null, null, "INVALID_TOKEN", "The token is invalid");
+            return new TokenPayload(false, null, null, null, ErrorCodes.INVALID_TOKEN, ErrorMessages.INVALID_TOKEN);
         }
     }
 
@@ -110,7 +115,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String extractRole(String token) {
-        return getClaims(token).get("role", String.class);
+        return getClaims(token).get(JwtConstants.CLAIM_ROLE, String.class);
     }
 
     @Override
