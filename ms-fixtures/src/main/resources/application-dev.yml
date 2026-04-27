@@ -3,7 +3,7 @@ server:
 
 teams:
   service:
-    url: ${TEAMS_SERVICE_URL:http://localhost:9003}
+    url: ${TEAMS_SERVICE_URL:http://localhost:8080}
 
 management:
   endpoints:
