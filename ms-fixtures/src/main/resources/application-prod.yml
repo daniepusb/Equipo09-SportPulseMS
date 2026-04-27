@@ -1,6 +1,10 @@
 server:
   port: ${SERVER_PORT}
 
+teams:
+  service:
+    url: ${TEAMS_SERVICE_URL:http://localhost:9003}
+
 management:
   endpoints:
     web:

@@ -1,6 +1,10 @@
 server:
   port: ${SERVER_PORT}
 
+teams:
+  service:
+    url: ${TEAMS_SERVICE_URL:http://localhost:8080}
+
 management:
   endpoints:
     web:
@@ -9,3 +13,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+logging:
+  level:
+    com.sportpulse.ms_fixtures: DEBUG
+    org.springframework.web: DEBUG
