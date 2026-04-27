@@ -1,0 +1,301 @@
+x-common-env: &common-env
+  JWT_SECRET: ${JWT_SECRET}
+  RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 45s
+
+networks:
+  sportpulse-network:
+    driver: bridge
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: sportpulse-redis
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: ${REDIS_MEM_LIMIT}
+          cpus: "0.5"
+
+  postgres-auth:
+    image: postgres:15-alpine
+    container_name: sportpulse-postgres-auth
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER} -d ${AUTH_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${AUTH_DB_MEM_LIMIT}
+          cpus: "0.5"
+
+  postgres-notifications:
+    image: postgres:15-alpine
+    container_name: sportpulse-postgres-notifications
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    environment:
+      POSTGRES_DB: ${NOTIF_DB_NAME}
+      POSTGRES_USER: ${NOTIF_DB_USER}
+      POSTGRES_PASSWORD: ${NOTIF_DB_PASSWORD}
+    volumes:
+      - postgres-notifications-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${NOTIF_DB_USER} -d ${NOTIF_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${NOTIF_DB_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-auth:
+    build: ./ms-auth
+    container_name: sportpulse-ms-auth
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_AUTH_HOST}:${DB_PORT}/${AUTH_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SERVER_PORT: ${AUTH_INTERNAL_PORT}
+      DB_HOST: ${POSTGRES_AUTH_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${AUTH_DB_NAME}
+      DB_USERNAME: ${AUTH_DB_USER}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${AUTH_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${AUTH_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-leagues:
+    build: ./ms-leagues
+    container_name: sportpulse-ms-leagues
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    environment:
+      <<: *common-env
+      SERVER_PORT: ${LEAGUES_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${LEAGUES_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${LEAGUES_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-teams:
+    build: ./ms-teams
+    container_name: sportpulse-ms-teams
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    environment:
+      <<: *common-env
+      SERVER_PORT: ${TEAMS_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${TEAMS_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${TEAMS_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-fixtures:
+    build: ./ms-fixtures
+    container_name: sportpulse-ms-fixtures
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    depends_on:
+      ms-teams:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
+      SERVER_PORT: ${FIXTURES_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${FIXTURES_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${FIXTURES_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-standings:
+    build: ./ms-standings
+    container_name: sportpulse-ms-standings
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    depends_on:
+      ms-teams:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
+      SERVER_PORT: ${STANDINGS_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${STANDINGS_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${STANDINGS_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-notifications:
+    build: ./ms-notifications
+    container_name: sportpulse-ms-notifications
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    depends_on:
+      postgres-notifications:
+        condition: service_healthy
+      ms-fixtures:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_NOTIF_HOST}:${DB_PORT}/${NOTIF_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${NOTIF_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${NOTIF_DB_PASSWORD}
+      FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      SERVER_PORT: ${NOTIF_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${NOTIF_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${NOTIF_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-dashboard:
+    build: ./ms-dashboard
+    container_name: sportpulse-ms-dashboard
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    depends_on:
+      ms-fixtures:
+        condition: service_healthy
+      ms-standings:
+        condition: service_healthy
+      ms-leagues:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      STANDINGS_SERVICE_URL: ${STANDINGS_SERVICE_URL}
+      LEAGUES_SERVICE_URL: ${LEAGUES_SERVICE_URL}
+      SERVER_PORT: ${DASHBOARD_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${DASHBOARD_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${DASHBOARD_MEM_LIMIT}
+          cpus: "0.5"
+
+  ms-gateway:
+    build: ./ms-gateway
+    container_name: sportpulse-gateway
+    restart: ${RESTART_POLICY}
+    networks:
+      - sportpulse-network
+    ports:
+      - "${GATEWAY_HOST_PORT}:${GATEWAY_INTERNAL_PORT}"
+    depends_on:
+      ms-auth:
+        condition: service_healthy
+      ms-leagues:
+        condition: service_healthy
+      ms-teams:
+        condition: service_healthy
+      ms-fixtures:
+        condition: service_healthy
+      ms-standings:
+        condition: service_healthy
+      ms-notifications:
+        condition: service_healthy
+      ms-dashboard:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      LEAGUES_SERVICE_URL: ${LEAGUES_SERVICE_URL}
+      TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
+      FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      STANDINGS_SERVICE_URL: ${STANDINGS_SERVICE_URL}
+      NOTIFICATIONS_SERVICE_URL: ${NOTIFICATIONS_SERVICE_URL}
+      DASHBOARD_SERVICE_URL: ${DASHBOARD_SERVICE_URL}
+      RATE_LIMIT_PER_IP: ${RATE_LIMIT_PER_IP}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SERVER_PORT: ${GATEWAY_INTERNAL_PORT}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${GATEWAY_INTERNAL_PORT}/actuator/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: ${GATEWAY_MEM_LIMIT}
+          cpus: "1.0"
+
+volumes:
+  postgres-auth-data:
+  postgres-notifications-data:

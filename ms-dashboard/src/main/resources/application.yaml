@@ -1,3 +1,5 @@
 spring:
   application:
     name: ms-dashboard
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}

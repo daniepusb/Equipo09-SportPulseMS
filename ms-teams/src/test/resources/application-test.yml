@@ -1,0 +1,16 @@
+server:
+  port: 0
+
+api-football:
+  base-url: https://v3.football.api-sports.io
+  host: v3.football.api-sports.io
+  key: test-rapidapi-key
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

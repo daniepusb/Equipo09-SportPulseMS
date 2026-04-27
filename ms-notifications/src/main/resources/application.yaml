@@ -1,3 +1,5 @@
 spring:
   application:
     name: ms-notifications
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}

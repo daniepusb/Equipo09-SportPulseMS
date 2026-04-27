@@ -1,3 +1,5 @@
 spring:
   application:
     name: ms-auth
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
