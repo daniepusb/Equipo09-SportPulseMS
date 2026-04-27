@@ -6,5 +6,5 @@ import com.sportpulse.ms_fixtures.dto.FixtureResponse;
 import com.sportpulse.ms_fixtures.model.FixtureStatus;
 
 public interface FixtureService {
-    List<FixtureResponse> getFixtures(Long league, Long team, LocalDate date, FixtureStatus status);
+    List<FixtureResponse> getFixtures(Long league, Integer season, Long team, LocalDate date, FixtureStatus status);
 }

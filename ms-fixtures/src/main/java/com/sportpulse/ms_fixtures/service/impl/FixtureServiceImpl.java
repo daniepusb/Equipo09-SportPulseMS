@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import com.sportpulse.ms_fixtures.exception.PlanRestrictionException;
 
 @Service
 @Slf4j
@@ -33,27 +34,28 @@ public class FixtureServiceImpl implements FixtureService {
     }
 
     @Override
-    public List<FixtureResponse> getFixtures(Long league, Long team, LocalDate date, FixtureStatus status) {
+    public List<FixtureResponse> getFixtures(Long league, Integer season, Long team, LocalDate date, FixtureStatus status) {
         boolean hasAnyFilter = league != null || team != null || date != null || status != null;
         LocalDate effectiveDate = hasAnyFilter ? date : LocalDate.now();
 
-        Integer season = null;
+        Integer resolvedSeason = null;
         if (league != null) {
-            season = inferSeasonFromDate(effectiveDate);
-            log.info("Infered season {} for league {} with date {}", season, league, effectiveDate);
+            resolvedSeason = (season != null) ? season : inferSeasonFromDate(effectiveDate);
+            PlanRestrictionException.validate(resolvedSeason);
+            log.info("Resolved season {} for league {} with date {}", resolvedSeason, league, effectiveDate);
         }
 
-        List<Fixture> fixtures = fixtureRepository.findByFilters(league, season, team, effectiveDate, status);
+        List<Fixture> fixtures = fixtureRepository.findByFilters(league, resolvedSeason, team, effectiveDate, status);
 
         Set<Long> teamIds = fixtures.stream()
             .flatMap(f -> Stream.of(f.homeTeam().id(), f.awayTeam().id()))
             .collect(Collectors.toSet());
 
-       Map<Long, TeamDto> teamsData = teamIds.stream()
-        .collect(Collectors.toMap(
-            Function.identity(),
-            id -> teamsClient.getTeamById(id)
-        ));
+        Map<Long, TeamDto> teamsData = teamIds.stream()
+            .collect(Collectors.toMap(
+                Function.identity(),
+                id -> teamsClient.getTeamById(id)
+            ));
 
         return fixtures.stream()
             .map(fixture -> fixtureMapper.toResponse(fixture, teamsData))

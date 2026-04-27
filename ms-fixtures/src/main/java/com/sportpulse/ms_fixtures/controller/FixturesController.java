@@ -30,13 +30,14 @@ public class FixturesController {
     @GetMapping
     public ResponseEntity<List<FixtureResponse>> getFixtures(
         @RequestParam(required = false) Long league,
+        @RequestParam(required = false) Integer season,
         @RequestParam(required = false) Long team,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @RequestParam(required = false) FixtureStatus status,
         @RequestHeader(value = HeaderConstants.X_USER_ID, required = false) String userId
     ) {
         requireUser(userId);
-        List<FixtureResponse> body = fixtureService.getFixtures(league, team, date, status);
+        List<FixtureResponse> body = fixtureService.getFixtures(league, season, team, date, status);
         return ResponseEntity.ok(body);
     }
 
