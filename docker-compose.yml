@@ -119,8 +119,13 @@ services:
     restart: ${RESTART_POLICY}
     networks:
       - sportpulse-network
+    depends_on:
+      redis:
+        condition: service_healthy
     environment:
       <<: *common-env
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       SERVER_PORT: ${LEAGUES_INTERNAL_PORT}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${LEAGUES_INTERNAL_PORT}/actuator/health"]
