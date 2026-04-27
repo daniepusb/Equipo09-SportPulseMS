@@ -2,3 +2,13 @@ management:
   health:
     redis:
       enabled: false
+
+api-football:
+  base-url: ${API_FOOTBALL_BASE_URL:https://v3.football.api-sports.io}
+  host: ${API_FOOTBALL_HOST:v3.football.api-sports.io}
+  key: ${RAPIDAPI_KEY}
+
+logging:
+  level:
+    com.sportpulse.ms-gateway: DEBUG
+    org.springframework.web: DEBUG

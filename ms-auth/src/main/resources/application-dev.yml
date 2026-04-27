@@ -42,3 +42,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+
+logging:
+  level:
+    com.sportpulse.ms-auth: DEBUG
+    org.springframework.web: DEBUG
