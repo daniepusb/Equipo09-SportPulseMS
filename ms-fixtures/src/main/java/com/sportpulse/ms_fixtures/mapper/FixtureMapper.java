@@ -4,6 +4,7 @@ import com.sportpulse.ms_fixtures.dto.FixtureResponse;
 import com.sportpulse.ms_fixtures.dto.TeamDto;
 import com.sportpulse.ms_fixtures.model.Fixture;
 import com.sportpulse.ms_fixtures.model.TeamSnapshot;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -21,9 +22,9 @@ public interface FixtureMapper {
     @Mapping(source = "fixture.venue.city",  target = "venue.city")
     @Mapping(target = "homeTeam", expression = "java(toTeamInfo(fixture.homeTeam(), fixture.goals() != null ? fixture.goals().home() : null, teamsData))")
     @Mapping(target = "awayTeam", expression = "java(toTeamInfo(fixture.awayTeam(), fixture.goals() != null ? fixture.goals().away() : null, teamsData))")
-    FixtureResponse toResponse(Fixture fixture, Map<Long, TeamDto> teamsData);
+    FixtureResponse toResponse(Fixture fixture, @Context Map<Long, TeamDto> teamsData);
 
-    default FixtureResponse.TeamInfo toTeamInfo(TeamSnapshot team, Integer goals, Map<Long, TeamDto> teamsData) {
+    default FixtureResponse.TeamInfo toTeamInfo(TeamSnapshot team, Integer goals, @Context Map<Long, TeamDto> teamsData) {
         if (team == null) return null;
         TeamDto enrichedTeam = teamsData.get(team.id());
         String logo = enrichedTeam != null ? enrichedTeam.logo() : team.logo();
