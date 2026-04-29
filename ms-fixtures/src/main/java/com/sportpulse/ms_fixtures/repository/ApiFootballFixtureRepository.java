@@ -208,7 +208,7 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
     public List<ApiFootballEventResponse> getEventsByFixtureId(Integer fixtureId) {
         String url = apiFootballBaseUrl + "/fixtures/events?fixture=" + fixtureId;
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-apisports-key", apiFootballKey);
+        headers.set("X-RapidApi-Key", apiFootballKey);
 
         ResponseEntity<ApiFootballEventsResponse> response = restTemplate.exchange(
             url, HttpMethod.GET, new HttpEntity<>(headers), ApiFootballEventsResponse.class);
