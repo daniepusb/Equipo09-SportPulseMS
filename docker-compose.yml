@@ -144,6 +144,8 @@ services:
       - sportpulse-network
     environment:
       <<: *common-env
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       SERVER_PORT: ${TEAMS_INTERNAL_PORT}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${TEAMS_INTERNAL_PORT}/actuator/health"]
@@ -166,6 +168,7 @@ services:
     environment:
       <<: *common-env
       TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
+      TEAMS_INTERNAL_PORT: ${TEAMS_INTERNAL_PORT}
       SERVER_PORT: ${FIXTURES_INTERNAL_PORT}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${FIXTURES_INTERNAL_PORT}/actuator/health"]
@@ -188,6 +191,9 @@ services:
     environment:
       <<: *common-env
       TEAMS_SERVICE_URL: ${TEAMS_SERVICE_URL}
+      TEAMS_INTERNAL_PORT: ${TEAMS_INTERNAL_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       SERVER_PORT: ${STANDINGS_INTERNAL_PORT}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${STANDINGS_INTERNAL_PORT}/actuator/health"]
@@ -215,6 +221,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${NOTIF_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${NOTIF_DB_PASSWORD}
       FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      FIXTURES_INTERNAL_PORT: ${FIXTURES_INTERNAL_PORT}
       SERVER_PORT: ${NOTIF_INTERNAL_PORT}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${NOTIF_INTERNAL_PORT}/actuator/health"]
@@ -241,8 +248,11 @@ services:
     environment:
       <<: *common-env
       FIXTURES_SERVICE_URL: ${FIXTURES_SERVICE_URL}
+      FIXTURES_INTERNAL_PORT: ${FIXTURES_INTERNAL_PORT}
       STANDINGS_SERVICE_URL: ${STANDINGS_SERVICE_URL}
+      STANDINGS_INTERNAL_PORT: ${STANDINGS_INTERNAL_PORT}
       LEAGUES_SERVICE_URL: ${LEAGUES_SERVICE_URL}
+      LEAGUES_INTERNAL_PORT: ${LEAGUES_INTERNAL_PORT}
       SERVER_PORT: ${DASHBOARD_INTERNAL_PORT}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${DASHBOARD_INTERNAL_PORT}/actuator/health"]

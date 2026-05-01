@@ -1,6 +1,14 @@
 server:
   port: 0
 
+api-football:
+  base-url: https://test.api-sports.io
+  key: test-key
+
+teams:
+  service:
+    url: http://localhost:8083
+
 management:
   endpoints:
     web:
