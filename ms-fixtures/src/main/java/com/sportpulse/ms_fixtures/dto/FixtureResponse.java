@@ -10,7 +10,8 @@ public record FixtureResponse(
     LeagueInfo league,
     TeamInfo homeTeam,
     TeamInfo awayTeam,
-    VenueInfo venue
+    VenueInfo venue,
+    Integer elapsed
 ) {
     public record StatusInfo(@JsonProperty("short") String shortCode, @JsonProperty("long") String longCode) {}
     public record LeagueInfo(Long id, String name, String round) {}

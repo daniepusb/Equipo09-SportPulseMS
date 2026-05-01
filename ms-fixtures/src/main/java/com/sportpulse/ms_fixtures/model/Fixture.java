@@ -11,7 +11,8 @@ public record Fixture(
     TeamSnapshot homeTeam,
     TeamSnapshot awayTeam,
     VenueInfo venue,
-    GoalsInfo goals
+    GoalsInfo goals,
+    Integer elapsed
 ) {
     public record LeagueInfo(Long id, String name, String round) {}
     public record VenueInfo(String name, String city) {}

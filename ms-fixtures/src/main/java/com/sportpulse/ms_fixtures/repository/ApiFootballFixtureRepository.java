@@ -63,6 +63,7 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
         }
 
         String finalUrl = urlBuilder.toString();
+        System.out.println("Calling API-Football: " + finalUrl);
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         headers.set("X-RapidAPI-Key", apiFootballKey);
@@ -84,7 +85,7 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
                 .filter(Objects::nonNull)
                 .toList();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error calling API-Football: " + e.getMessage());
             return List.of();
         }
     }
@@ -117,6 +118,7 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
         Fixture.GoalsInfo goalsInfo = item.goals() != null
             ? new Fixture.GoalsInfo(item.goals().home(), item.goals().away())
             : new Fixture.GoalsInfo(null, null);
+        Integer elapsed = item.fixture().status().elapsed();
 
         return new Fixture(
             item.fixture().id(),
@@ -127,7 +129,8 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
             homeTeam,
             awayTeam,
             venueInfo,
-            goalsInfo
+            goalsInfo,
+            elapsed
         );
     }
 
@@ -140,7 +143,8 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
         if (shortCode == null) return FixtureStatus.NS;
         return switch (shortCode) {
             case "FT", "AET", "PEN" -> FixtureStatus.FT;
-            case "LIVE", "1H", "HT", "2H", "ET", "BT", "P" -> FixtureStatus.LIVE;
+            case "LIVE", "1H", "HT", "2H", "ET", "BT", "P", "SUSP", "INT" -> FixtureStatus.LIVE;
+            case "NS", "TBD" -> FixtureStatus.NS;
             default -> FixtureStatus.NS;
         };
     }
@@ -169,7 +173,8 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record ApiFootballFixtureStatus(
         @JsonProperty("short") String shortCode,
-        @JsonProperty("long") String longCode
+        @JsonProperty("long") String longCode,
+        @JsonProperty("elapsed") Integer elapsed
     ) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -208,7 +213,9 @@ public class ApiFootballFixtureRepository implements FixtureRepository {
     public List<ApiFootballEventResponse> getEventsByFixtureId(Integer fixtureId) {
         String url = apiFootballBaseUrl + "/fixtures/events?fixture=" + fixtureId;
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-RapidApi-Key", apiFootballKey);
+        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.set("X-RapidAPI-Key", apiFootballKey);
+        headers.set("X-RapidAPI-Host", apiFootballHost);
 
         ResponseEntity<ApiFootballEventsResponse> response = restTemplate.exchange(
             url, HttpMethod.GET, new HttpEntity<>(headers), ApiFootballEventsResponse.class);

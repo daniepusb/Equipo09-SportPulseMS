@@ -20,6 +20,7 @@ public interface FixtureMapper {
     @Mapping(source = "fixture.league.round",target = "league.round")
     @Mapping(source = "fixture.venue.name",  target = "venue.name")
     @Mapping(source = "fixture.venue.city",  target = "venue.city")
+    @Mapping(source = "elapsed",             target = "elapsed")
     @Mapping(target = "homeTeam", expression = "java(toTeamInfo(fixture.homeTeam(), fixture.goals() != null ? fixture.goals().home() : null, teamsData))")
     @Mapping(target = "awayTeam", expression = "java(toTeamInfo(fixture.awayTeam(), fixture.goals() != null ? fixture.goals().away() : null, teamsData))")
     FixtureResponse toResponse(Fixture fixture, @Context Map<Long, TeamDto> teamsData);

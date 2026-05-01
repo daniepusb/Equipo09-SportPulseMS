@@ -55,14 +55,30 @@ public class FixtureServiceImpl implements FixtureService {
 
         List<Fixture> fixtures = fixtureRepository.findByFilters(league, resolvedSeason, team, effectiveDate, status);
 
+        if (status == FixtureStatus.LIVE) {
+            fixtures = fixtures.stream()
+                .filter(f -> f.statusShort() == FixtureStatus.LIVE)
+                .toList();
+        }
+
         Set<Long> teamIds = fixtures.stream()
             .flatMap(f -> Stream.of(f.homeTeam().id(), f.awayTeam().id()))
             .collect(Collectors.toSet());
 
         Map<Long, TeamDto> teamsData = teamIds.stream()
+            .map(id -> {
+                try {
+                    return teamsClient.getTeamById(id);
+                } catch (Exception e) {
+                    log.error("Error fetching team {} data: {}", id, e.getMessage());
+                    return null;
+                }
+            })
+            .filter(java.util.Objects::nonNull)
             .collect(Collectors.toMap(
+                TeamDto::id,
                 Function.identity(),
-                id -> teamsClient.getTeamById(id)
+                (existing, replacement) -> existing
             ));
 
         return fixtures.stream()
