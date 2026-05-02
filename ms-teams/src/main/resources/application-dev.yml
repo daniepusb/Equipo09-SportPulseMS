@@ -9,3 +9,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+logging:
+  level:
+    com.sportpulse.ms-teams: DEBUG
+    org.springframework.web: DEBUG

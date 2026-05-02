@@ -3,7 +3,6 @@ package com.sportpulse.ms_teams.exception;
 import com.sportpulse.ms_teams.controller.TeamsController;
 import com.sportpulse.ms_teams.constants.ErrorCodes;
 import com.sportpulse.ms_teams.constants.HeaderConstants;
-import com.sportpulse.ms_teams.constants.ResponseFields;
 import com.sportpulse.ms_teams.mapper.TeamMapper;
 import com.sportpulse.ms_teams.service.TeamService;
 import org.junit.jupiter.api.Test;
@@ -37,8 +36,8 @@ class GlobalExceptionHandlerTest {
                 .header(HeaderConstants.X_USER_ID, "test-user"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").value(ErrorCodes.MISSING_PARAMETER))
-            .andExpect(jsonPath("$." + ResponseFields.MESSAGE).exists())
-            .andExpect(jsonPath("$." + ResponseFields.TIMESTAMP).exists());
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test

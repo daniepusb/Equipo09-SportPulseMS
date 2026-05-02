@@ -1,5 +1,6 @@
 package com.sportpulse.ms_leagues.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,4 +14,6 @@ public record League(
     Integer       currentSeason,
     LocalDate     startDate,
     LocalDate     endDate
-) {}
+) implements Serializable {
+    private static final long serialVersionUID = 1L;
+}

@@ -3,3 +3,26 @@ spring:
     name: ms-standings
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000 # 1 hour
+
+server:
+  port: ${STANDINGS_INTERNAL_PORT:8085}
+
+api-football:
+  base-url: https://v3.football.api-sports.io
+  key: ${RAPIDAPI_KEY}
+
+teams:
+  service:
+    url: ${TEAMS_SERVICE_URL:http://ms-teams:8083}
+
+logging:
+  level:
+    com.sportpulse: DEBUG

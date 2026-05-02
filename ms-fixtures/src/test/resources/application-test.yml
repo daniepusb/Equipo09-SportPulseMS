@@ -1,6 +1,15 @@
 server:
   port: 0
 
+teams:
+  service:
+    url: http://localhost:9003
+
+api-football:
+  base-url: https://v3.football.api-sports.io
+  host: v3.football.api-sports.io
+  key: test-key
+
 management:
   endpoints:
     web:

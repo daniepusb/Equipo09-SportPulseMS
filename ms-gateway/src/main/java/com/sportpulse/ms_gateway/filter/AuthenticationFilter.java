@@ -72,12 +72,13 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                         .bodyToMono(TokenPayload.class)
                         .flatMap(payload -> {
                             if (payload != null && payload.isValid()) {
-                                // 4. Enriquecer la request con info del usuario para los MS destino
-                                ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                                    .header(GatewayHeaders.X_USER_ID, payload.getUserId())
-                                    .header(GatewayHeaders.X_USER_ROLE, payload.getRole())
-                                    .header(GatewayHeaders.X_USER_NAME, payload.getUsername())
-                                        .build();
+                                 // 4. Enriquecer la request con info del usuario para los MS destino
+                                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                                     .header(HttpHeaders.AUTHORIZATION, authHeader)
+                                     .header(GatewayHeaders.X_USER_ID, payload.getUserId())
+                                     .header(GatewayHeaders.X_USER_ROLE, payload.getRole())
+                                     .header(GatewayHeaders.X_USER_NAME, payload.getUsername())
+                                         .build();
 
                                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
                             } else {

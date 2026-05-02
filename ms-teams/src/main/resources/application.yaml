@@ -3,6 +3,14 @@ spring:
     name: ms-teams
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000 # 1 hour in milliseconds
 
 api-football:
   base-url: ${API_FOOTBALL_BASE_URL:https://v3.football.api-sports.io}

@@ -1,5 +1,7 @@
 package com.sportpulse.ms_teams.model;
 
+import java.io.Serializable;
+
 public record Team(
     Long    id,
     String  name,
@@ -8,4 +10,4 @@ public record Team(
     Integer foundedYear,
     Boolean national,
     Stadium stadium
-) {}
+) implements Serializable {}

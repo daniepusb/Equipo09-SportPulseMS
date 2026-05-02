@@ -1,6 +1,19 @@
 server:
   port: 0
 
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: simple
+
+api-football:
+  base-url: https://test.apifootball.io
+  host: test.apifootball.io
+  key: test-key
+
 management:
   endpoints:
     web:
