@@ -1,6 +1,6 @@
 package com.sportpulse.ms_standings.config;
 
-import com.sportpulse.ms_standings.models.dto.request.TeamDto;
+import com.sportpulse.ms_standings.models.request.TeamDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

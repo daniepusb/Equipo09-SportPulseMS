@@ -1,7 +1,7 @@
 package com.sportpulse.ms_standings.controller.impl;
 
 import com.sportpulse.ms_standings.controller.StandingsApi;
-import com.sportpulse.ms_standings.models.dto.response.StandingResponse;
+import com.sportpulse.ms_standings.models.response.StandingResponse;
 import com.sportpulse.ms_standings.service.StandingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +23,15 @@ public class StandingApiController implements StandingsApi {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "userId is required");
         }
         StandingResponse response = standingService.getStandings(league, season);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<StandingResponse> getTeamStanding(Long teamId, Integer league, Integer season, String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "userId is required");
+        }
+        StandingResponse response = standingService.getTeamStanding(teamId, league, season);
         return ResponseEntity.ok(response);
     }
 }

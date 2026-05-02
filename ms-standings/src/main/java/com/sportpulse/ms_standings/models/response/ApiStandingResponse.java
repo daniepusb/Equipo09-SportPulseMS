@@ -1,4 +1,4 @@
-package com.sportpulse.ms_standings.models.dto.response;
+package com.sportpulse.ms_standings.models.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,7 +27,8 @@ public record ApiStandingResponse(
             @JsonProperty("team") ApiTeam team,
             Integer points,
             @JsonProperty("all") ApiStats all,
-            String form
+            String form,
+            String description
     ) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)

@@ -1,4 +1,4 @@
-package com.sportpulse.ms_standings.models.dto.request;
+package com.sportpulse.ms_standings.models.request;
 
 public record TeamDto(
         Long id,
